@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono, Heebo } from "next/font/google";
+import { getLocale } from "next-intl/server";
+
+import { DEFAULT_LOCALE, DIRECTION, isAppLocale } from "@/i18n/config";
 import "./globals.css";
 
 /**
@@ -41,13 +44,15 @@ export const metadata: Metadata = {
     "מערכת לניהול ותיאום פגישות ושיחות — בקשה, תיאום, מעקב, ביצוע וסיכום במקום אחד",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
+
   return (
     <html
-      lang="he"
-      dir="rtl"
+      lang={locale}
+      dir={DIRECTION[isAppLocale(locale) ? locale : DEFAULT_LOCALE]}
       className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${heebo.variable}`}
       style={
         {
