@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ChevronRight, Mail, MessageCircle, Phone } from "lucide-react";
 
+import { MeetingLink } from "@/components/meeting-link";
 import { Badge, Eyebrow, GlassCard, cn } from "@/components/ui/primitives";
 import { requireUser } from "@/lib/current-user";
 import { can } from "@/lib/rbac";
@@ -108,6 +109,7 @@ export default async function RequestWorkspace({
           scheduledEnd: true,
           location: true,
           meetingUrl: true,
+          dialNumber: true,
           status: true,
         },
         orderBy: { scheduledStart: "desc" },
@@ -485,9 +487,17 @@ export default async function RequestWorkspace({
               <p className="text-[16px] text-frost-glow">
                 {fmtSlot(nextMeeting.scheduledStart)}
               </p>
-              <p className="text-[13px] text-fog-veil">
-                {[nextMeeting.location, nextMeeting.meetingUrl].filter(Boolean).join(" · ") || "—"}
-              </p>
+              {nextMeeting.location ? (
+                <p className="text-[13px] text-fog-veil">{nextMeeting.location}</p>
+              ) : null}
+              <MeetingLink
+                url={nextMeeting.meetingUrl}
+                dialNumber={nextMeeting.dialNumber}
+                className="pt-1"
+              />
+              {!nextMeeting.location && !nextMeeting.meetingUrl && !nextMeeting.dialNumber ? (
+                <p className="text-[13px] text-fog-veil">—</p>
+              ) : null}
             </GlassCard>
           ) : null}
 

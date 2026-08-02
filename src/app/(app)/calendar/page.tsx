@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { Badge, Eyebrow, EmptyState, GlassCard, cn } from "@/components/ui/primitives";
+import { MeetingLink } from "@/components/meeting-link";
 import { requireUser } from "@/lib/current-user";
 import { requestVisibility } from "@/services/requests/visibility";
 import { BOOKED_STATUSES } from "@/lib/workflow";
@@ -51,7 +52,7 @@ export default async function CalendarPage({
       contact: { select: { fullName: true, company: true } },
       coordinator: { select: { fullName: true } },
       meetings: {
-        select: { location: true, meetingUrl: true, scheduledEnd: true },
+        select: { location: true, meetingUrl: true, dialNumber: true, scheduledEnd: true },
         orderBy: { scheduledStart: "desc" },
         take: 1,
       },
@@ -171,6 +172,13 @@ export default async function CalendarPage({
                           {row.subject}
                         </span>
                       </span>
+                      {/* The way in sits on the row itself, so joining a call
+                          never means opening the request first. */}
+                      <MeetingLink
+                        url={row.meetings[0]?.meetingUrl}
+                        dialNumber={row.meetings[0]?.dialNumber}
+                        compact
+                      />
                       {row.coordinator ? (
                         <span className="text-[12.5px] text-fog-veil">
                           {row.coordinator.fullName}

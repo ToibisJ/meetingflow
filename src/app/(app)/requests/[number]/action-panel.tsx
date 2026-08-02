@@ -290,10 +290,22 @@ export function ActionPanel({
             <Field label={`${t("scheduleLocation")} · ${tcommon("optional")}`}>
               <TextInput name="location" />
             </Field>
-            <Field label={`${t("scheduleUrl")} · ${tcommon("optional")}`}>
-              <TextInput name="meetingUrl" dir="ltr" />
+            <Field label={`${t("scheduleDial")} · ${tcommon("optional")}`}>
+              <TextInput name="dialNumber" dir="ltr" />
             </Field>
           </div>
+          {/* One box for every platform. The link itself says which one it is,
+              so there is nothing to pick and nothing to get wrong. */}
+          <Field
+            label={`${t("scheduleUrl")} · ${tcommon("optional")}`}
+            hint={t("scheduleUrlHint")}
+          >
+            <TextInput
+              name="meetingUrl"
+              dir="ltr"
+              placeholder="https://zoom.us/j/…   ·   https://meet.google.com/…"
+            />
+          </Field>
         </Action>
       ) : null}
 
@@ -316,6 +328,26 @@ export function ActionPanel({
               </select>
             </Field>
           </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={`${t("scheduleLocation")} · ${tcommon("optional")}`}>
+              <TextInput name="location" />
+            </Field>
+            <Field label={`${t("scheduleDial")} · ${tcommon("optional")}`}>
+              <TextInput name="dialNumber" dir="ltr" />
+            </Field>
+          </div>
+          {/* A new time usually means a new room, so the link is editable here
+              too rather than only on the first booking. */}
+          <Field
+            label={`${t("scheduleUrl")} · ${tcommon("optional")}`}
+            hint={t("scheduleUrlHint")}
+          >
+            <TextInput
+              name="meetingUrl"
+              dir="ltr"
+              placeholder="https://zoom.us/j/…   ·   https://meet.google.com/…"
+            />
+          </Field>
           <Field label={`${t("scheduleReason")} · ${tcommon("optional")}`}>
             <textarea name="reason" className={areaClass} />
           </Field>

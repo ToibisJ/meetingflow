@@ -281,7 +281,9 @@
     "fieldPurpose": "מטרה מתוקנת",
     "fieldLocation": "מקום מתוקן",
     "fieldMeetingUrl": "קישור מתוקן",
-    "correctedTitle": "תיקון"
+    "correctedTitle": "תיקון",
+    "scheduleDial": "מספר חיוג",
+    "scheduleUrlHint": "הדבק כאן את הקישור מזום, מ-Google Meet, מ-Teams או מכל פלטפורמה אחרת. המערכת מזהה לבד באיזו מדובר ומציגה כפתור הצטרפות בכל מקום שהפגישה מופיעה בו."
   },
   "priorityFactor": {
     "requesterPriority": "העדיפות שהעובד הגדיר",

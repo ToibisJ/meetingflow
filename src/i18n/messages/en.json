@@ -281,7 +281,9 @@
     "fieldPurpose": "Corrected purpose",
     "fieldLocation": "Corrected location",
     "fieldMeetingUrl": "Corrected link",
-    "correctedTitle": "Correction"
+    "correctedTitle": "Correction",
+    "scheduleDial": "Dial-in number",
+    "scheduleUrlHint": "Paste the link from Zoom, Google Meet, Teams or any other platform. The system recognises which one it is and shows a join button wherever the meeting appears."
   },
   "priorityFactor": {
     "requesterPriority": "The priority the employee set",

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { Badge, Eyebrow, GlassCard } from "@/components/ui/primitives";
+import { MeetingLink } from "@/components/meeting-link";
 import { requireUser } from "@/lib/current-user";
 import { formatMeetingSlot, formatDay } from "@/lib/dates";
 import { BOOKED_STATUSES } from "@/lib/workflow";
@@ -49,6 +50,11 @@ export default async function MyDayPage() {
         type: true,
         scheduledAt: true,
         contact: { select: { fullName: true, company: true, phone: true } },
+        meetings: {
+          select: { meetingUrl: true, dialNumber: true },
+          orderBy: { scheduledStart: "desc" },
+          take: 1,
+        },
       },
       orderBy: { scheduledAt: "asc" },
     }),
@@ -153,6 +159,12 @@ export default async function MyDayPage() {
                   {row.contact.company ? ` · ${row.contact.company}` : ""}
                 </span>
                 <span className="text-[13px] text-fog-veil">{row.subject}</span>
+                {/* Today's calls are joined from here, not from inside the request. */}
+                <MeetingLink
+                  url={row.meetings[0]?.meetingUrl}
+                  dialNumber={row.meetings[0]?.dialNumber}
+                  compact
+                />
               </Link>
             ))}
       </GlassCard>
