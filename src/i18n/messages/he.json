@@ -51,6 +51,7 @@
     "tasks": "משימות המשך",
     "users": "משתמשים",
     "auditLog": "יומן ביקורת",
+    "guide": "מדריך המערכת",
     "settings": "הגדרות",
     "sectionWork": "עבודה",
     "sectionInsight": "מידע",
@@ -60,7 +61,7 @@
   "auth": {
     "signInTitle": "כניסה למערכת",
     "signInSubtitle": "הזן את פרטי המשתמש שלך",
-    "email": "דואר אלקטרוני",
+    "email": "שם משתמש או דואר אלקטרוני",
     "password": "סיסמה",
     "signIn": "כניסה",
     "signingIn": "מתחבר",

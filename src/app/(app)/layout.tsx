@@ -4,6 +4,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import {
   BarChart3,
   Bell,
+  BookOpen,
   CalendarDays,
   ClipboardList,
   Inbox,
@@ -56,6 +57,7 @@ const SECTIONS: { titleKey: string; entries: NavEntry[] }[] = [
       { href: "/contacts", labelKey: "nav.contacts", icon: Users, permission: "contact:read" },
       { href: "/analytics", labelKey: "nav.analytics", icon: BarChart3, permission: "analytics:self" },
       { href: "/notifications", labelKey: "nav.notifications", icon: Bell, permission: null },
+      { href: "/guide", labelKey: "nav.guide", icon: BookOpen, permission: null },
     ],
   },
   {

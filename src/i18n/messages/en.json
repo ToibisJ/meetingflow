@@ -51,6 +51,7 @@
     "tasks": "Follow-up tasks",
     "users": "Users",
     "auditLog": "Audit log",
+    "guide": "User guide",
     "settings": "Settings",
     "sectionWork": "Work",
     "sectionInsight": "Insight",
@@ -60,7 +61,7 @@
   "auth": {
     "signInTitle": "Sign in",
     "signInSubtitle": "Enter your account details",
-    "email": "Email",
+    "email": "Username or email",
     "password": "Password",
     "signIn": "Sign in",
     "signingIn": "Signing in",

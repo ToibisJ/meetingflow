@@ -38,10 +38,13 @@ export function LoginForm({ labels }: { labels: LoginLabels }) {
     <form action={formAction} className="flex flex-col gap-4">
       {message ? <ErrorNote>{message}</ErrorNote> : null}
 
+      {/* Deliberately type="text": the login identifier is whatever the
+          administrator set, which may be a plain username rather than an
+          address. Browser email validation would reject those. */}
       <Field label={labels.email}>
         <TextInput
           name="email"
-          type="email"
+          type="text"
           autoComplete="username"
           required
           dir="ltr"
