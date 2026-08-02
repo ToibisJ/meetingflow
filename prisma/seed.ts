@@ -62,19 +62,34 @@ function intBetween(min: number, max: number): number {
 
 const NOW = new Date();
 
-function daysAgo(days: number, hour = 9, minute = 0): Date {
+function shiftDays(days: number, hour: number, minute: number): Date {
   const date = new Date(NOW);
-  date.setDate(date.getDate() - days);
+  date.setDate(date.getDate() + days);
   date.setHours(hour, minute, 0, 0);
   return date;
 }
 
+/**
+ * A point in the past. Clamped, because "0 days ago at 16:00" generated at
+ * 09:00 would land in the future and make age and idle counters negative.
+ */
+function daysAgo(days: number, hour = 9, minute = 0): Date {
+  const date = shiftDays(-days, hour, minute);
+  return date.getTime() > NOW.getTime() ? new Date(NOW) : date;
+}
+
+/** A point in the future. Deliberately not clamped — meetings are booked ahead. */
 function daysAhead(days: number, hour = 10, minute = 0): Date {
-  return daysAgo(-days, hour, minute);
+  return shiftDays(days, hour, minute);
 }
 
 function addMinutes(date: Date, minutes: number): Date {
   return new Date(date.getTime() + minutes * 60000);
+}
+
+/** Timeline events walk forward in time, so they also need a ceiling of now. */
+function noLaterThanNow(date: Date): Date {
+  return date.getTime() > NOW.getTime() ? new Date(NOW) : date;
 }
 
 // ---------------------------------------------------------------- fixtures
@@ -546,13 +561,15 @@ async function main() {
         channel: event.channel ?? null,
         outcome: event.outcome ?? null,
         body: event.body ?? null,
-        occurredAt: event.occurredAt,
+        occurredAt: noLaterThanNow(event.occurredAt),
       })),
     });
 
     await db.meetingRequest.update({
       where: { id: request.id },
-      data: { lastActivityAt: timeline[timeline.length - 1].occurredAt },
+      data: {
+        lastActivityAt: noLaterThanNow(timeline[timeline.length - 1].occurredAt),
+      },
     });
 
     // ------------------------------------------------------ meeting

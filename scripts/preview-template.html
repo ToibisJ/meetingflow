@@ -3,31 +3,63 @@
 <style>
   /* ------------------------------------------------------------------
      MeetingFlow preview.
-     Palette, type ladder, radii and elevation come from the project's
-     own design system (DESIGN.md, "frosted glass at midnight"). The
-     system forbids light-theme colours in core tokens, so this page
-     commits to the dark world on purpose rather than shipping a half
-     considered second theme.
+
+     The dark palette, type ladder, radii and elevation come from the
+     project's design system (DESIGN.md, "frosted glass at midnight").
+     A light theme was requested on top of it, so every colour is a token
+     and the two themes are two token sets — components never reference a
+     raw colour, which is what keeps both themes honest.
      ------------------------------------------------------------------ */
 
   :root {
+    /* ground and surfaces */
     --canvas: #05060f;
     --glass: rgba(186, 214, 247, 0.03);
     --glass-raised: rgba(186, 214, 247, 0.06);
+    --glass-strong: rgba(186, 214, 247, 0.1);
     --hairline: rgba(186, 215, 247, 0.12);
     --hairline-soft: rgba(186, 215, 247, 0.06);
+    --grid-line: rgba(186, 215, 247, 0.06);
+    --halo: rgba(124, 145, 182, 0.46);
+    --halo-opacity: 0.45;
 
+    /* text ladder */
     --ink-display: #d8ecf8;
     --ink: #d1e4fa;
     --ink-muted: #c7d3ea;
     --ink-quiet: #9da7ba;
 
+    /* the single chromatic accent */
     --accent: #663af3;
+    --accent-ink: #c0acff;
+    --accent-wash: rgba(102, 58, 243, 0.08);
+    --accent-edge: rgba(102, 58, 243, 0.22);
+    --accent-select: rgba(102, 58, 243, 0.12);
 
+    /* semantic state — separate from the accent by design */
     --late: #e05a4c;
+    --late-bg: rgba(224, 90, 76, 0.16);
+    --late-ink: #f0a094;
     --warn: #e0a83c;
+    --warn-bg: rgba(224, 168, 60, 0.16);
+    --warn-ink: #e8c37a;
     --today: #6ea8f0;
+    --today-bg: rgba(110, 168, 240, 0.16);
+    --today-ink: #a8caf5;
     --done: #269684;
+    --done-bg: rgba(38, 150, 132, 0.16);
+    --done-ink: #7fd7c6;
+
+    --chip-bg: rgba(199, 211, 234, 0.12);
+    --wordmark: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
+
+    --card-shadow:
+      inset 0 1px 1px rgba(199, 211, 234, 0.12),
+      inset 0 24px 48px rgba(199, 211, 234, 0.05),
+      0 24px 32px rgba(6, 6, 14, 0.7);
+    --tile-shadow:
+      inset 0 1px 1px rgba(199, 211, 234, 0.12),
+      inset 0 24px 48px rgba(199, 211, 234, 0.05);
 
     --font-body: "Segoe UI Variable Text", "Segoe UI", -apple-system,
       BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
@@ -37,6 +69,56 @@
 
     --page: 1200px;
     color-scheme: dark;
+  }
+
+  /* The light theme keeps the structure and the violet, and swaps the ground
+     for a cool off-white with a slight blue bias toward the accent. */
+  :root[data-theme="light"] {
+    --canvas: #eef1f7;
+    --glass: rgba(255, 255, 255, 0.74);
+    --glass-raised: rgba(255, 255, 255, 0.94);
+    --glass-strong: rgba(31, 45, 71, 0.06);
+    --hairline: rgba(31, 45, 71, 0.13);
+    --hairline-soft: rgba(31, 45, 71, 0.07);
+    --grid-line: rgba(31, 45, 71, 0.045);
+    --halo: rgba(102, 58, 243, 0.16);
+    --halo-opacity: 0.5;
+
+    --ink-display: #131c2e;
+    --ink: #1f2b40;
+    --ink-muted: #46536e;
+    --ink-quiet: #6b7896;
+
+    --accent: #5b2fe0;
+    --accent-ink: #4a24c4;
+    --accent-wash: rgba(91, 47, 224, 0.06);
+    --accent-edge: rgba(91, 47, 224, 0.2);
+    --accent-select: rgba(91, 47, 224, 0.08);
+
+    --late: #c4372a;
+    --late-bg: rgba(196, 55, 42, 0.1);
+    --late-ink: #a52c21;
+    --warn: #a06f10;
+    --warn-bg: rgba(160, 111, 16, 0.11);
+    --warn-ink: #855c0c;
+    --today: #2a63b8;
+    --today-bg: rgba(42, 99, 184, 0.1);
+    --today-ink: #23539b;
+    --done: #14705f;
+    --done-bg: rgba(20, 112, 95, 0.1);
+    --done-ink: #0f5b4d;
+
+    --chip-bg: rgba(31, 45, 71, 0.07);
+    --wordmark: linear-gradient(0deg, #24314d 0%, #4b5f8c 100%);
+
+    --card-shadow:
+      inset 0 0 0 1px rgba(31, 45, 71, 0.07),
+      0 12px 28px rgba(31, 45, 71, 0.08);
+    --tile-shadow:
+      inset 0 0 0 1px rgba(31, 45, 71, 0.07),
+      0 6px 16px rgba(31, 45, 71, 0.06);
+
+    color-scheme: light;
   }
 
   * { box-sizing: border-box; }
@@ -51,9 +133,10 @@
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
     overflow-x: hidden;
+    transition: background-color 240ms ease, color 240ms ease;
   }
 
-  /* Ambient blueprint grid and the spotlight halo, per the design system. */
+  /* Ambient blueprint grid and the spotlight halo. */
   body::before,
   body::after {
     content: "";
@@ -65,8 +148,8 @@
 
   body::before {
     background-image:
-      linear-gradient(to right, var(--hairline-soft) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--hairline-soft) 1px, transparent 1px);
+      linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
     background-size: 84px 84px;
     -webkit-mask-image: radial-gradient(ellipse 110% 70% at 50% 0%, #000 38%, transparent 100%);
     mask-image: radial-gradient(ellipse 110% 70% at 50% 0%, #000 38%, transparent 100%);
@@ -76,12 +159,11 @@
     background: conic-gradient(
       at 50% -6%,
       transparent 45%,
-      rgba(124, 145, 182, 0.28) 49%,
-      rgba(124, 145, 182, 0.46) 50%,
-      rgba(124, 145, 182, 0.28) 51%,
+      var(--halo) 49%,
+      var(--halo) 51%,
       transparent 55%
     );
-    opacity: 0.45;
+    opacity: var(--halo-opacity);
   }
 
   .shell {
@@ -92,7 +174,7 @@
     padding: 28px 20px 72px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 22px;
   }
 
   /* ---------------------------------------------------------- masthead */
@@ -112,7 +194,7 @@
     letter-spacing: -0.01em;
     line-height: 1.1;
     margin: 0;
-    background: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
+    background: var(--wordmark);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -128,18 +210,23 @@
     margin: 0 0 6px;
   }
 
-  .provenance {
-    font-size: 12px;
-    color: var(--ink-quiet);
-    text-align: start;
-    max-width: 340px;
+  .masthead-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 360px;
   }
 
-  .provenance b { color: var(--ink-muted); font-weight: 500; }
+  .provenance { font-size: 12px; color: var(--ink-quiet); margin: 0; }
+  .provenance b { color: var(--ink-muted); font-weight: 600; }
+
+  .viewer-line { font-size: 13px; color: var(--ink-quiet); margin: 10px 0 0; }
+  .viewer-line b { color: var(--ink); font-weight: 600; }
 
   /* ---------------------------------------------------------- controls */
 
-  .roles {
+  .segmented {
     display: inline-flex;
     padding: 3px;
     gap: 3px;
@@ -148,33 +235,29 @@
     box-shadow: inset 0 0 0 1px var(--hairline);
   }
 
-  .roles button {
+  .segmented button {
     appearance: none;
     border: 0;
     cursor: pointer;
     border-radius: 999px;
-    padding: 7px 16px;
+    padding: 7px 15px;
     font: inherit;
     font-size: 13px;
     color: var(--ink-muted);
     background: transparent;
     transition: background-color 160ms ease, color 160ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  .roles button[aria-pressed="true"] {
-    background: rgba(186, 214, 247, 0.14);
-    color: #fff;
+  .segmented button[aria-pressed="true"] {
+    background: var(--glass-strong);
+    color: var(--ink-display);
+    font-weight: 600;
   }
 
-  .roles button:hover:not([aria-pressed="true"]) { color: var(--ink); }
-
-  .viewer-line {
-    font-size: 13px;
-    color: var(--ink-quiet);
-    margin: 10px 0 0;
-  }
-
-  .viewer-line b { color: var(--ink); font-weight: 500; }
+  .segmented button:hover:not([aria-pressed="true"]) { color: var(--ink); }
 
   /* ------------------------------------------------------------ cards */
 
@@ -182,10 +265,8 @@
     background: var(--glass);
     border-radius: 16px;
     padding: 22px;
-    box-shadow:
-      inset 0 1px 1px rgba(199, 211, 234, 0.12),
-      inset 0 24px 48px rgba(199, 211, 234, 0.05),
-      0 24px 32px rgba(6, 6, 14, 0.7);
+    box-shadow: var(--card-shadow);
+    transition: background-color 240ms ease, box-shadow 240ms ease;
   }
 
   .card h2 {
@@ -196,28 +277,25 @@
     margin: 0 0 2px;
   }
 
-  .card .sub {
-    font-size: 12px;
-    color: var(--ink-quiet);
-    margin: 0 0 16px;
-  }
+  .card .sub { font-size: 12.5px; color: var(--ink-quiet); margin: 0 0 16px; }
 
   .card-head {
     display: flex;
-    align-items: baseline;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 12px;
+    gap: 14px;
     flex-wrap: wrap;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
 
   .card-head h2 { margin: 0; }
+  .card-head .sub { margin: 2px 0 0; }
 
   /* -------------------------------------------------------- kpi rings */
 
   .rings {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
     gap: 12px;
   }
 
@@ -231,26 +309,22 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 18px 10px;
-    border-radius: 16px;
-    background: var(--glass);
-    color: inherit;
-    box-shadow:
-      inset 0 1px 1px rgba(199, 211, 234, 0.12),
-      inset 0 24px 48px rgba(199, 211, 234, 0.05);
-    transition: background-color 160ms ease, box-shadow 160ms ease;
-  }
-
-  .ring:hover { background: var(--glass-raised); }
-
-  .ring[aria-pressed="true"] {
+    padding: 16px 10px;
+    border-radius: 14px;
     background: var(--glass-raised);
-    box-shadow:
-      inset 0 0 0 1px rgba(186, 214, 247, 0.28),
-      inset 0 24px 48px rgba(199, 211, 234, 0.05);
+    color: inherit;
+    box-shadow: var(--tile-shadow);
+    transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
   }
 
-  .ring figure { position: relative; width: 62px; height: 62px; margin: 0; }
+  .ring:hover { transform: translateY(-2px); }
+
+  .ring[aria-expanded="true"] {
+    box-shadow: var(--tile-shadow), inset 0 0 0 1px var(--accent-edge);
+    background: var(--accent-wash);
+  }
+
+  .ring figure { position: relative; width: 58px; height: 58px; margin: 0; }
   .ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
 
   .ring .value {
@@ -258,12 +332,83 @@
     inset: 0;
     display: grid;
     place-items: center;
-    font-size: 21px;
-    font-weight: 600;
+    font-size: 20px;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
 
   .ring .label { font-size: 12.5px; color: var(--ink-muted); line-height: 1.25; }
+
+  /* The panel a ring opens: the rows behind that number, in place. */
+  .breakdown {
+    margin-top: 18px;
+    border-top: 1px solid var(--hairline);
+    padding-top: 16px;
+  }
+
+  .breakdown-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+
+  .breakdown-head h3 {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink-display);
+    margin: 0;
+  }
+
+  .breakdown-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+
+  .breakdown-list button {
+    appearance: none;
+    border: 0;
+    width: 100%;
+    cursor: pointer;
+    font: inherit;
+    text-align: start;
+    background: transparent;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    transition: background-color 140ms ease;
+  }
+
+  .breakdown-list li + li button { border-top: 1px solid var(--hairline-soft); }
+  .breakdown-list button:hover { background: var(--glass-strong); }
+
+  .breakdown-list .id {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-quiet);
+    font-size: 12.5px;
+    min-width: 44px;
+    flex: none;
+  }
+
+  .breakdown-list .main { flex: 1; min-width: 0; }
+  .breakdown-list .main strong { display: block; font-weight: 600; color: var(--ink); font-size: 13.5px; }
+  .breakdown-list .main span { display: block; color: var(--ink-quiet); font-size: 12px; }
+
+  .link-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--accent-ink);
+    padding: 4px 2px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 
   /* -------------------------------------------------------- attention */
 
@@ -286,17 +431,18 @@
   }
 
   .attention button + button { border-top: 1px solid var(--hairline-soft); }
-  .attention button:hover { background: var(--glass-raised); color: var(--ink); }
+  .attention button:hover { background: var(--glass-strong); color: var(--ink); }
 
   .dot { width: 9px; height: 9px; border-radius: 999px; flex: none; }
   .dot.late { background: var(--late); }
   .dot.warn { background: var(--warn); }
   .dot.today { background: var(--today); }
+  .dot.accent { background: var(--accent); }
 
   .attention .count {
     font-variant-numeric: tabular-nums;
     color: var(--ink-display);
-    font-weight: 600;
+    font-weight: 700;
   }
 
   .attention .go { margin-inline-start: auto; color: var(--ink-quiet); font-size: 18px; }
@@ -309,7 +455,7 @@
 
   th {
     text-align: start;
-    font-weight: 400;
+    font-weight: 500;
     color: var(--ink-quiet);
     padding: 0 8px 10px;
     white-space: nowrap;
@@ -319,14 +465,13 @@
   td { padding: 12px 8px; border-top: 1px solid var(--hairline); vertical-align: top; }
 
   tbody tr { cursor: pointer; transition: background-color 140ms ease; }
-  tbody tr:hover { background: rgba(186, 214, 247, 0.045); }
-  tbody tr[aria-selected="true"] { background: rgba(102, 58, 243, 0.12); }
+  tbody tr:hover { background: var(--glass-strong); }
+  tbody tr[aria-selected="true"] { background: var(--accent-select); }
 
   .num { font-variant-numeric: tabular-nums; color: var(--ink); }
-  .who { color: var(--ink); }
+  .who { color: var(--ink); font-weight: 500; }
   .where { color: var(--ink-quiet); font-size: 12px; }
   .subject { color: var(--ink-muted); max-width: 240px; }
-
   .quiet { color: var(--ink-quiet); }
 
   /* ----------------------------------------------------------- badges */
@@ -341,14 +486,14 @@
     font-weight: 500;
     white-space: nowrap;
     box-shadow: inset 0 0 0 1px var(--hairline-soft);
-    background: rgba(199, 211, 234, 0.12);
+    background: var(--chip-bg);
     color: var(--ink);
   }
 
-  .badge.late { background: rgba(224, 90, 76, 0.16); color: #f0a094; }
-  .badge.warn { background: rgba(224, 168, 60, 0.16); color: #e8c37a; }
-  .badge.today { background: rgba(110, 168, 240, 0.16); color: #a8caf5; }
-  .badge.done { background: rgba(38, 150, 132, 0.16); color: #7fd7c6; }
+  .badge.late { background: var(--late-bg); color: var(--late-ink); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .badge.today { background: var(--today-bg); color: var(--today-ink); }
+  .badge.done { background: var(--done-bg); color: var(--done-ink); }
 
   .score {
     display: inline-flex;
@@ -358,15 +503,15 @@
     border-radius: 6px;
     padding: 4px 6px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
     box-shadow: inset 0 0 0 1px var(--hairline-soft);
   }
 
-  .score.CRITICAL { background: rgba(224, 90, 76, 0.18); color: #f0a094; }
-  .score.HIGH { background: rgba(224, 168, 60, 0.18); color: #e8c37a; }
-  .score.MEDIUM { background: rgba(110, 168, 240, 0.16); color: #a8caf5; }
-  .score.LOW { background: rgba(199, 211, 234, 0.1); color: var(--ink-quiet); }
+  .score.CRITICAL { background: var(--late-bg); color: var(--late-ink); }
+  .score.HIGH { background: var(--warn-bg); color: var(--warn-ink); }
+  .score.MEDIUM { background: var(--today-bg); color: var(--today-ink); }
+  .score.LOW { background: var(--chip-bg); color: var(--ink-quiet); }
 
   /* -------------------------------------------------------- workspace */
 
@@ -387,8 +532,8 @@
   .detail-meta { font-size: 12.5px; color: var(--ink-quiet); margin: 0 0 18px; }
 
   .facts { display: flex; flex-direction: column; gap: 14px; margin: 0; }
-
   .fact { display: flex; flex-direction: column; gap: 3px; }
+
   .fact dt {
     font-family: var(--font-mono);
     font-size: 10.5px;
@@ -396,39 +541,27 @@
     text-transform: uppercase;
     color: var(--ink-quiet);
   }
+
   .fact dd { margin: 0; font-size: 14px; color: var(--ink-muted); }
 
-  /* Score explanation — the point of the priority engine is that it shows
-     its working, so the breakdown is a first-class part of the detail. */
+  /* Score explanation — the priority engine shows its working. */
   .why {
     margin-top: 18px;
     padding: 14px;
     border-radius: 12px;
-    background: rgba(102, 58, 243, 0.08);
-    box-shadow: inset 0 0 0 1px rgba(102, 58, 243, 0.22);
+    background: var(--accent-wash);
+    box-shadow: inset 0 0 0 1px var(--accent-edge);
   }
 
-  .why h3 {
-    font-size: 13px;
-    font-weight: 600;
-    color: #c0acff;
-    margin: 0 0 10px;
-  }
-
+  .why h3 { font-size: 13px; font-weight: 700; color: var(--accent-ink); margin: 0 0 10px; }
   .why ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
-
-  .why li {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    font-size: 13px;
-    color: var(--ink-muted);
-  }
+  .why li { display: flex; align-items: baseline; gap: 10px; font-size: 13px; color: var(--ink-muted); }
 
   .why .pts {
     font-variant-numeric: tabular-nums;
     font-size: 12px;
-    color: #c0acff;
+    font-weight: 700;
+    color: var(--accent-ink);
     min-width: 30px;
     text-align: end;
     flex: none;
@@ -447,11 +580,7 @@
     background: var(--hairline);
   }
 
-  .timeline li {
-    position: relative;
-    padding-inline-start: 24px;
-    padding-block: 9px;
-  }
+  .timeline li { position: relative; padding-inline-start: 24px; padding-block: 9px; }
 
   .timeline li::before {
     content: "";
@@ -465,8 +594,8 @@
     box-shadow: 0 0 0 1px var(--hairline);
   }
 
-  .timeline li.ai::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(102, 58, 243, 0.2); }
-  .timeline li.key::before { background: var(--today); box-shadow: 0 0 0 3px rgba(110, 168, 240, 0.16); }
+  .timeline li.ai::before { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-edge); }
+  .timeline li.key::before { background: var(--today); box-shadow: 0 0 0 3px var(--today-bg); }
 
   .timeline time {
     font-family: var(--font-mono);
@@ -481,14 +610,7 @@
 
   /* ----------------------------------------------------------- footer */
 
-  .legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px 22px;
-    font-size: 12px;
-    color: var(--ink-quiet);
-  }
-
+  .legend { display: flex; flex-wrap: wrap; gap: 14px 22px; font-size: 12.5px; color: var(--ink-quiet); }
   .legend span { display: inline-flex; align-items: center; gap: 7px; }
 
   footer {
@@ -501,17 +623,21 @@
     gap: 8px;
   }
 
-  footer b { color: var(--ink-muted); font-weight: 500; }
+  footer b { color: var(--ink-muted); font-weight: 600; }
 
   :where(button, a, tr):focus-visible {
-    outline: 2px solid #b6d9fc;
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 
-  ::selection { background: rgba(102, 58, 243, 0.4); color: #fff; }
+  ::selection { background: var(--accent); color: #fff; }
 
   @media (prefers-reduced-motion: reduce) {
-    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+    .ring:hover { transform: none; }
   }
 </style>
 
@@ -523,11 +649,17 @@
       <h1 class="wordmark">MeetingFlow</h1>
       <p class="viewer-line" id="viewer-line"></p>
     </div>
-    <p class="provenance">
-      תצוגה מקדימה של הממשק. כל מספר, שם ותאריך בעמוד הזה נלקחו
-      <b>ממסד הנתונים של המערכת</b>, מהרצה בתאריך <b id="stamp"></b>.
-      שום נתון כאן לא הומצא לצורך המצגת.
-    </p>
+    <div class="masthead-side">
+      <div class="segmented" role="group" aria-label="ערכת צבע">
+        <button type="button" data-theme-choice="dark" aria-pressed="true">כהה</button>
+        <button type="button" data-theme-choice="light" aria-pressed="false">בהיר</button>
+      </div>
+      <p class="provenance">
+        תצוגה מקדימה של הממשק. כל מספר, שם ותאריך בעמוד הזה נלקחו
+        <b>ממסד הנתונים של המערכת</b>, מהרצה בתאריך <b id="stamp"></b>.
+        שום נתון כאן לא הומצא לצורך המצגת.
+      </p>
+    </div>
   </header>
 
   <div class="card">
@@ -536,7 +668,7 @@
         <h2>מי מסתכל על המסך</h2>
         <p class="sub">אותו מסך בדיוק, שני תפקידים. ההרשאות משנות מה נראה.</p>
       </div>
-      <div class="roles" role="group" aria-label="בחירת תפקיד">
+      <div class="segmented" role="group" aria-label="בחירת תפקיד">
         <button type="button" data-role="coordinator" aria-pressed="true">מתאמת פגישות</button>
         <button type="button" data-role="employee" aria-pressed="false">עובד</button>
       </div>
@@ -544,8 +676,15 @@
     <p class="sub" id="role-explainer" style="margin:0"></p>
   </div>
 
-  <section aria-label="מדדים">
+  <section class="card" aria-label="מדדים">
+    <div class="card-head">
+      <div>
+        <h2>תמונת מצב</h2>
+        <p class="sub">לחיצה על מדד פותחת כאן את הבקשות שמאחורי המספר.</p>
+      </div>
+    </div>
     <div class="rings" id="rings"></div>
+    <div id="breakdown"></div>
   </section>
 
   <section class="card">
@@ -560,9 +699,6 @@
         <h2 id="table-title">מרכז העבודה</h2>
         <p class="sub" id="table-sub"></p>
       </div>
-      <button type="button" class="ring" id="clear-filter" style="display:none;padding:8px 16px;flex-direction:row">
-        <span class="label">נקה סינון</span>
-      </button>
     </div>
     <div class="table-wrap">
       <table>
@@ -608,7 +744,7 @@
       <span><i class="dot late"></i> באיחור או חורג מזמן הטיפול</span>
       <span><i class="dot warn"></i> דורש תשומת לב</span>
       <span><i class="dot today"></i> מתקיים היום</span>
-      <span><i class="dot" style="background:var(--accent)"></i> פעולה של הבינה המלאכותית</span>
+      <span><i class="dot accent"></i> פעולה של הבינה המלאכותית</span>
     </div>
   </section>
 
@@ -685,7 +821,6 @@
     SMS: "מסרון", LINKEDIN: "לינקדאין", IN_SYSTEM: "במערכת", OTHER: "אחר",
   };
 
-  // Each factor the priority engine can contribute, in the user's language.
   const FACTOR = {
     requesterPriority: () => "העדיפות שהעובד הגדיר",
     openFor: (p) => `הבקשה פתוחה ${p.days} ימים`,
@@ -713,7 +848,7 @@
   const EMPLOYEE = "יונתן כהן";
 
   let role = "coordinator";
-  let filter = null;
+  let openMetric = null;
   let selected = null;
 
   const visible = () =>
@@ -734,8 +869,9 @@
 
   const fmtDate = (iso) => {
     if (!iso) return "—";
-    const d = new Date(iso);
-    return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+    return new Date(iso).toLocaleDateString("he-IL", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+    });
   };
 
   const fmtDateTime = (iso) => {
@@ -749,31 +885,42 @@
 
   const slaClass = (r) => (r.sla === "RED" ? "late" : r.sla === "AMBER" ? "warn" : "");
 
-  // ------------------------------------------------------------ counters
+  const isToday = (iso) => {
+    if (!iso) return false;
+    const t = new Date(iso);
+    const s = new Date(); s.setHours(0, 0, 0, 0);
+    const e = new Date(); e.setHours(23, 59, 59, 999);
+    return t >= s && t <= e;
+  };
 
-  function counters(rows) {
-    const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date(); endOfDay.setHours(23, 59, 59, 999);
+  // ------------------------------------------------------------ metrics
 
-    return {
-      needsCoordination: rows.filter((r) => ["NEW", "NEEDS_COORDINATION"].includes(r.status)).length,
-      inProgress: rows.filter((r) => r.status === "IN_PROGRESS").length,
-      waiting: rows.filter((r) => ["WAITING_FOR_CONTACT", "WAITING_FOR_EMPLOYEE"].includes(r.status)).length,
-      scheduled: rows.filter((r) => BOOKED.includes(r.status)).length,
-      today: rows.filter((r) => {
-        if (!BOOKED.includes(r.status) || !r.scheduledAt) return false;
-        const t = new Date(r.scheduledAt);
-        return t >= startOfDay && t <= endOfDay;
-      }).length,
-      completed: rows.filter((r) => r.status === "COMPLETED").length,
-    };
-  }
+  const RING_DEFS = [
+    { key: "needsCoordination", label: "דורשות תיאום", tone: "var(--late)",
+      note: "בקשות שאף מתאם עדיין לא לקח לטיפול.",
+      match: (r) => ["NEW", "NEEDS_COORDINATION"].includes(r.status) },
+    { key: "inProgress", label: "בטיפול", tone: "var(--today)",
+      note: "מתאם לקח אותן, והתיאום מול הצד השני בעיצומו.",
+      match: (r) => r.status === "IN_PROGRESS" },
+    { key: "waiting", label: "ממתינות לתשובה", tone: "var(--warn)",
+      note: "הכדור אצל הצד השני או אצל העובד שפתח את הבקשה.",
+      match: (r) => ["WAITING_FOR_CONTACT", "WAITING_FOR_EMPLOYEE"].includes(r.status) },
+    { key: "scheduled", label: "נקבעו", tone: "var(--done)",
+      note: "יש מועד סגור ביומן.",
+      match: (r) => BOOKED.includes(r.status) },
+    { key: "today", label: "היום", tone: "var(--today)",
+      note: "פגישות ושיחות שמתקיימות במהלך היום הזה.",
+      match: (r) => BOOKED.includes(r.status) && isToday(r.scheduledAt) },
+    { key: "completed", label: "הסתיימו", tone: "var(--ink-quiet)",
+      note: "הפגישה התקיימה והסיכום התקבל.",
+      match: (r) => r.status === "COMPLETED" },
+  ];
 
   function attention(rows) {
     const out = [];
 
     // Same thresholds and the same precision as the product: compare against a
-    // timestamp, not a rounded day count, so these numbers match the app exactly.
+    // timestamp, not a rounded day count, so these match the app exactly.
     const hoursAgo = (h) => Date.now() - h * 3600000;
     const daysAgo = (d) => Date.now() - d * 86400000;
 
@@ -785,13 +932,7 @@
       (r) => r.status === "WAITING_FOR_CONTACT" &&
         new Date(r.lastActivityAt).getTime() < daysAgo(3),
     );
-    const todayRows = rows.filter((r) => {
-      if (!BOOKED.includes(r.status) || !r.scheduledAt) return false;
-      const t = new Date(r.scheduledAt);
-      const s = new Date(); s.setHours(0, 0, 0, 0);
-      const e = new Date(); e.setHours(23, 59, 59, 999);
-      return t >= s && t <= e;
-    });
+    const todayRows = rows.filter((r) => BOOKED.includes(r.status) && isToday(r.scheduledAt));
     const noSummary = rows.filter((r) => r.status === "SUMMARY_REQUIRED");
     const stale = rows.filter(
       (r) => OPEN.includes(r.status) && r.status !== "NEW" &&
@@ -809,42 +950,35 @@
 
   // -------------------------------------------------------------- render
 
-  const RING_DEFS = [
-    { key: "needsCoordination", label: "דורשות תיאום", tone: "var(--late)", match: (r) => ["NEW", "NEEDS_COORDINATION"].includes(r.status) },
-    { key: "inProgress", label: "בטיפול", tone: "var(--today)", match: (r) => r.status === "IN_PROGRESS" },
-    { key: "waiting", label: "ממתינות לתשובה", tone: "var(--warn)", match: (r) => ["WAITING_FOR_CONTACT", "WAITING_FOR_EMPLOYEE"].includes(r.status) },
-    { key: "scheduled", label: "נקבעו", tone: "var(--done)", match: (r) => BOOKED.includes(r.status) },
-    { key: "today", label: "היום", tone: "var(--today)", match: (r) => {
-        if (!BOOKED.includes(r.status) || !r.scheduledAt) return false;
-        const t = new Date(r.scheduledAt);
-        const s = new Date(); s.setHours(0, 0, 0, 0);
-        const e = new Date(); e.setHours(23, 59, 59, 999);
-        return t >= s && t <= e;
-      } },
-    { key: "completed", label: "הסתיימו", tone: "var(--ink-quiet)", match: (r) => r.status === "COMPLETED" },
-  ];
-
   const R = 26;
   const C = 2 * Math.PI * R;
 
   function renderRings(rows) {
-    const c = counters(rows);
-    const total = Math.max(1, c.needsCoordination + c.inProgress + c.waiting + c.scheduled + c.completed);
+    const counts = {};
+    RING_DEFS.forEach((def) => { counts[def.key] = rows.filter(def.match).length; });
+
+    const total = Math.max(
+      1,
+      counts.needsCoordination + counts.inProgress + counts.waiting +
+        counts.scheduled + counts.completed,
+    );
+
     const host = document.getElementById("rings");
     host.replaceChildren();
 
     RING_DEFS.forEach((def) => {
-      const value = c[def.key];
+      const value = counts[def.key];
       const share = Math.min(1, value / total);
 
       const btn = el("button", "ring");
       btn.type = "button";
-      btn.setAttribute("aria-pressed", String(filter === def.key));
-      btn.setAttribute("aria-label", `${def.label}: ${value}`);
+      btn.setAttribute("aria-expanded", String(openMetric === def.key));
+      btn.setAttribute("aria-controls", "breakdown");
+      btn.setAttribute("aria-label", `${def.label}: ${value}. פתח פירוט`);
 
       btn.innerHTML =
         '<figure><svg viewBox="0 0 64 64" aria-hidden="true">' +
-        `<circle cx="32" cy="32" r="${R}" fill="none" stroke="rgba(186,215,247,0.12)" stroke-width="3"></circle>` +
+        `<circle cx="32" cy="32" r="${R}" fill="none" stroke="var(--hairline)" stroke-width="3"></circle>` +
         `<circle cx="32" cy="32" r="${R}" fill="none" stroke="${def.tone}" stroke-width="3" stroke-linecap="round" ` +
         `stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - share)).toFixed(2)}" ` +
         'style="transition:stroke-dashoffset 700ms ease-out"></circle></svg>' +
@@ -852,12 +986,93 @@
         `<span class="label">${def.label}</span>`;
 
       btn.addEventListener("click", () => {
-        filter = filter === def.key ? null : def.key;
+        openMetric = openMetric === def.key ? null : def.key;
         render();
+        if (openMetric) {
+          document.getElementById("breakdown").scrollIntoView({
+            behavior: "smooth", block: "nearest",
+          });
+        }
       });
 
       host.append(btn);
     });
+  }
+
+  function renderBreakdown(rows) {
+    const host = document.getElementById("breakdown");
+    host.replaceChildren();
+    host.id = "breakdown";
+
+    const def = RING_DEFS.find((d) => d.key === openMetric);
+    if (!def) return;
+
+    const matching = rows.filter(def.match).sort((a, b) => b.score - a.score);
+
+    const panel = el("div", "breakdown");
+
+    const head = el("div", "breakdown-head");
+    const titles = el("div");
+    titles.append(
+      el("h3", null, `${def.label} · ${matching.length}`),
+      el("p", "sub", def.note),
+    );
+    const close = el("button", "link-btn", "סגור פירוט");
+    close.type = "button";
+    close.addEventListener("click", () => { openMetric = null; render(); });
+    head.append(titles, close);
+    panel.append(head);
+
+    if (!matching.length) {
+      panel.append(el("p", "sub", "אין כרגע בקשות בקטגוריה הזו."));
+      host.append(panel);
+      return;
+    }
+
+    const list = el("ul", "breakdown-list");
+
+    matching.slice(0, 10).forEach((r) => {
+      const li = el("li");
+      const btn = el("button");
+      btn.type = "button";
+
+      btn.append(el("span", "id", "#" + r.number));
+
+      const main = el("span", "main");
+      main.append(el("strong", null, `${r.contact}${r.company ? " · " + r.company : ""}`));
+      const detail =
+        r.status === "SUMMARY_REQUIRED"
+          ? `${r.subject} · הסתיימה לפני ${r.idleDays} ימים`
+          : BOOKED.includes(r.status) && r.scheduledAt
+            ? `${r.subject} · ${fmtDateTime(r.scheduledAt)}`
+            : `${r.subject} · ללא פעילות ${r.idleDays} ימים`;
+      main.append(el("span", null, detail));
+      btn.append(main);
+
+      btn.append(el("span", "badge " + slaClass(r), STATUS[r.status] || r.status));
+      btn.append(el("span", "score " + r.band, String(r.score)));
+
+      btn.addEventListener("click", () => {
+        selected = r;
+        render();
+        document.getElementById("workspace").scrollIntoView({
+          behavior: "smooth", block: "start",
+        });
+      });
+
+      li.append(btn);
+      list.append(li);
+    });
+
+    panel.append(list);
+
+    if (matching.length > 10) {
+      panel.append(
+        el("p", "sub", `מוצגות 10 מתוך ${matching.length}, לפי ציון עדיפות.`),
+      );
+    }
+
+    host.append(panel);
   }
 
   function renderAttention(rows) {
@@ -874,33 +1089,29 @@
       const btn = el("button");
       btn.type = "button";
       btn.append(el("i", "dot " + item.tone));
-      const count = el("span", "count", String(item.n));
-      const text = el("span", null, " " + item.text);
+
       const wrap = el("span");
-      wrap.append(count, text);
+      wrap.append(el("span", "count", String(item.n)), el("span", null, " " + item.text));
       btn.append(wrap, el("span", "go", "‹"));
+
       btn.addEventListener("click", () => {
         selected = item.set.slice().sort((a, b) => b.score - a.score)[0] || null;
         render();
-        document.getElementById("workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+        document.getElementById("workspace").scrollIntoView({
+          behavior: "smooth", block: "start",
+        });
       });
+
       host.append(btn);
     });
   }
 
   function renderTable(rows) {
-    const def = RING_DEFS.find((d) => d.key === filter);
-    const shown = (def ? rows.filter(def.match) : rows)
-      .slice()
-      .sort((a, b) => b.score - a.score);
+    const shown = rows.slice().sort((a, b) => b.score - a.score);
 
     document.getElementById("table-title").textContent =
       role === "coordinator" ? "מרכז העבודה של המתאמת" : "הפגישות שלי";
-    document.getElementById("table-sub").textContent =
-      `${shown.length} בקשות` + (def ? ` · מסונן לפי ${def.label}` : "");
-
-    const clear = document.getElementById("clear-filter");
-    clear.style.display = def ? "inline-flex" : "none";
+    document.getElementById("table-sub").textContent = `${shown.length} בקשות`;
 
     const body = document.getElementById("rows");
     body.replaceChildren();
@@ -919,24 +1130,15 @@
 
       cell("subject").textContent = r.subject;
 
-      const status = cell();
-      const badge = el("span", "badge " + slaClass(r), STATUS[r.status] || r.status);
-      status.append(badge);
+      cell().append(el("span", "badge " + slaClass(r), STATUS[r.status] || r.status));
 
-      const coord = cell();
-      coord.append(
-        r.coordinator
-          ? el("span", null, r.coordinator)
-          : el("span", "quiet", "לא משויך"),
+      cell().append(
+        r.coordinator ? el("span", null, r.coordinator) : el("span", "quiet", "לא משויך"),
       );
 
       cell("num").textContent = r.openDays + " ימים";
-      const idle = cell("num");
-      idle.textContent = r.idleDays + " ימים";
-      if (r.idleDays > 3) idle.className = "num";
-
-      const sc = cell();
-      sc.append(el("span", "score " + r.band, String(r.score)));
+      cell("num").textContent = r.idleDays + " ימים";
+      cell().append(el("span", "score " + r.band, String(r.score)));
 
       const open = () => { selected = r; render(); };
       tr.addEventListener("click", open);
@@ -978,8 +1180,7 @@
 
     const why = document.getElementById("detail-why");
     why.replaceChildren();
-    const head = el("h3", null, `למה זה דחוף? ציון ${r.score} מתוך 100`);
-    why.append(head);
+    why.append(el("h3", null, `למה זה דחוף? ציון ${r.score} מתוך 100`));
 
     const list = el("ul");
     (r.factors || []).forEach((f) => {
@@ -1045,27 +1246,51 @@
         : `העובד רואה ${rows.length} בקשות בלבד — אלה שהוא פתח או משתתף בהן. שאר הבקשות אינן מגיעות לדפדפן שלו כלל.`;
 
     renderRings(rows);
+    renderBreakdown(rows);
     renderAttention(rows);
     renderTable(rows);
     renderDetail();
     renderTimeline();
   }
 
-  document.querySelectorAll(".roles button").forEach((btn) => {
+  // ------------------------------------------------------------- theme
+
+  function applyTheme(choice) {
+    document.documentElement.setAttribute("data-theme", choice);
+    document.querySelectorAll("[data-theme-choice]").forEach((btn) =>
+      btn.setAttribute("aria-pressed", String(btn.dataset.themeChoice === choice)),
+    );
+    try { localStorage.setItem("mf-theme", choice); } catch { /* private mode */ }
+  }
+
+  document.querySelectorAll("[data-theme-choice]").forEach((btn) => {
+    btn.addEventListener("click", () => applyTheme(btn.dataset.themeChoice));
+  });
+
+  // Start from the visitor's own preference: a saved choice, then the operating
+  // system setting, and only then the product's dark-first default.
+  let startTheme = "dark";
+  try {
+    const saved = localStorage.getItem("mf-theme");
+    if (saved === "light" || saved === "dark") startTheme = saved;
+    else if (window.matchMedia("(prefers-color-scheme: light)").matches) startTheme = "light";
+  } catch {
+    if (window.matchMedia("(prefers-color-scheme: light)").matches) startTheme = "light";
+  }
+  applyTheme(startTheme);
+
+  // ------------------------------------------------------------- roles
+
+  document.querySelectorAll("[data-role]").forEach((btn) => {
     btn.addEventListener("click", () => {
       role = btn.dataset.role;
-      filter = null;
+      openMetric = null;
       selected = null;
-      document.querySelectorAll(".roles button").forEach((other) =>
+      document.querySelectorAll("[data-role]").forEach((other) =>
         other.setAttribute("aria-pressed", String(other === btn)),
       );
       render();
     });
-  });
-
-  document.getElementById("clear-filter").addEventListener("click", () => {
-    filter = null;
-    render();
   });
 
   document.getElementById("stamp").textContent = new Date(DATA.generatedAt).toLocaleDateString(
