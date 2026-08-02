@@ -1,0 +1,1077 @@
+<title>MeetingFlow — תצוגה מקדימה</title>
+
+<style>
+  /* ------------------------------------------------------------------
+     MeetingFlow preview.
+     Palette, type ladder, radii and elevation come from the project's
+     own design system (DESIGN.md, "frosted glass at midnight"). The
+     system forbids light-theme colours in core tokens, so this page
+     commits to the dark world on purpose rather than shipping a half
+     considered second theme.
+     ------------------------------------------------------------------ */
+
+  :root {
+    --canvas: #05060f;
+    --glass: rgba(186, 214, 247, 0.03);
+    --glass-raised: rgba(186, 214, 247, 0.06);
+    --hairline: rgba(186, 215, 247, 0.12);
+    --hairline-soft: rgba(186, 215, 247, 0.06);
+
+    --ink-display: #d8ecf8;
+    --ink: #d1e4fa;
+    --ink-muted: #c7d3ea;
+    --ink-quiet: #9da7ba;
+
+    --accent: #663af3;
+
+    --late: #e05a4c;
+    --warn: #e0a83c;
+    --today: #6ea8f0;
+    --done: #269684;
+
+    --font-body: "Segoe UI Variable Text", "Segoe UI", -apple-system,
+      BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font-display: "Segoe UI Variable Display", "Segoe UI Semibold", "Segoe UI",
+      -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, "Cascadia Mono", "Consolas", "SF Mono", monospace;
+
+    --page: 1200px;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Ambient blueprint grid and the spotlight halo, per the design system. */
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::before {
+    background-image:
+      linear-gradient(to right, var(--hairline-soft) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--hairline-soft) 1px, transparent 1px);
+    background-size: 84px 84px;
+    -webkit-mask-image: radial-gradient(ellipse 110% 70% at 50% 0%, #000 38%, transparent 100%);
+    mask-image: radial-gradient(ellipse 110% 70% at 50% 0%, #000 38%, transparent 100%);
+  }
+
+  body::after {
+    background: conic-gradient(
+      at 50% -6%,
+      transparent 45%,
+      rgba(124, 145, 182, 0.28) 49%,
+      rgba(124, 145, 182, 0.46) 50%,
+      rgba(124, 145, 182, 0.28) 51%,
+      transparent 55%
+    );
+    opacity: 0.45;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: var(--page);
+    margin: 0 auto;
+    padding: 28px 20px 72px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* ---------------------------------------------------------- masthead */
+
+  .masthead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: clamp(30px, 5vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    margin: 0;
+    background: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    direction: ltr;
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-quiet);
+    margin: 0 0 6px;
+  }
+
+  .provenance {
+    font-size: 12px;
+    color: var(--ink-quiet);
+    text-align: start;
+    max-width: 340px;
+  }
+
+  .provenance b { color: var(--ink-muted); font-weight: 500; }
+
+  /* ---------------------------------------------------------- controls */
+
+  .roles {
+    display: inline-flex;
+    padding: 3px;
+    gap: 3px;
+    border-radius: 999px;
+    background: var(--glass-raised);
+    box-shadow: inset 0 0 0 1px var(--hairline);
+  }
+
+  .roles button {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    border-radius: 999px;
+    padding: 7px 16px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink-muted);
+    background: transparent;
+    transition: background-color 160ms ease, color 160ms ease;
+  }
+
+  .roles button[aria-pressed="true"] {
+    background: rgba(186, 214, 247, 0.14);
+    color: #fff;
+  }
+
+  .roles button:hover:not([aria-pressed="true"]) { color: var(--ink); }
+
+  .viewer-line {
+    font-size: 13px;
+    color: var(--ink-quiet);
+    margin: 10px 0 0;
+  }
+
+  .viewer-line b { color: var(--ink); font-weight: 500; }
+
+  /* ------------------------------------------------------------ cards */
+
+  .card {
+    background: var(--glass);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow:
+      inset 0 1px 1px rgba(199, 211, 234, 0.12),
+      inset 0 24px 48px rgba(199, 211, 234, 0.05),
+      0 24px 32px rgba(6, 6, 14, 0.7);
+  }
+
+  .card h2 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink-display);
+    margin: 0 0 2px;
+  }
+
+  .card .sub {
+    font-size: 12px;
+    color: var(--ink-quiet);
+    margin: 0 0 16px;
+  }
+
+  .card-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  .card-head h2 { margin: 0; }
+
+  /* -------------------------------------------------------- kpi rings */
+
+  .rings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+  }
+
+  .ring {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 10px;
+    border-radius: 16px;
+    background: var(--glass);
+    color: inherit;
+    box-shadow:
+      inset 0 1px 1px rgba(199, 211, 234, 0.12),
+      inset 0 24px 48px rgba(199, 211, 234, 0.05);
+    transition: background-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .ring:hover { background: var(--glass-raised); }
+
+  .ring[aria-pressed="true"] {
+    background: var(--glass-raised);
+    box-shadow:
+      inset 0 0 0 1px rgba(186, 214, 247, 0.28),
+      inset 0 24px 48px rgba(199, 211, 234, 0.05);
+  }
+
+  .ring figure { position: relative; width: 62px; height: 62px; margin: 0; }
+  .ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+
+  .ring .value {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 21px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ring .label { font-size: 12.5px; color: var(--ink-muted); line-height: 1.25; }
+
+  /* -------------------------------------------------------- attention */
+
+  .attention { display: flex; flex-direction: column; }
+
+  .attention button {
+    appearance: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    text-align: start;
+    background: transparent;
+    color: var(--ink-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 8px;
+    border-radius: 8px;
+    transition: background-color 160ms ease;
+  }
+
+  .attention button + button { border-top: 1px solid var(--hairline-soft); }
+  .attention button:hover { background: var(--glass-raised); color: var(--ink); }
+
+  .dot { width: 9px; height: 9px; border-radius: 999px; flex: none; }
+  .dot.late { background: var(--late); }
+  .dot.warn { background: var(--warn); }
+  .dot.today { background: var(--today); }
+
+  .attention .count {
+    font-variant-numeric: tabular-nums;
+    color: var(--ink-display);
+    font-weight: 600;
+  }
+
+  .attention .go { margin-inline-start: auto; color: var(--ink-quiet); font-size: 18px; }
+
+  /* ------------------------------------------------------------ table */
+
+  .table-wrap { overflow-x: auto; margin: 0 -6px; }
+
+  table { width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13px; }
+
+  th {
+    text-align: start;
+    font-weight: 400;
+    color: var(--ink-quiet);
+    padding: 0 8px 10px;
+    white-space: nowrap;
+    font-size: 12px;
+  }
+
+  td { padding: 12px 8px; border-top: 1px solid var(--hairline); vertical-align: top; }
+
+  tbody tr { cursor: pointer; transition: background-color 140ms ease; }
+  tbody tr:hover { background: rgba(186, 214, 247, 0.045); }
+  tbody tr[aria-selected="true"] { background: rgba(102, 58, 243, 0.12); }
+
+  .num { font-variant-numeric: tabular-nums; color: var(--ink); }
+  .who { color: var(--ink); }
+  .where { color: var(--ink-quiet); font-size: 12px; }
+  .subject { color: var(--ink-muted); max-width: 240px; }
+
+  .quiet { color: var(--ink-quiet); }
+
+  /* ----------------------------------------------------------- badges */
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: inset 0 0 0 1px var(--hairline-soft);
+    background: rgba(199, 211, 234, 0.12);
+    color: var(--ink);
+  }
+
+  .badge.late { background: rgba(224, 90, 76, 0.16); color: #f0a094; }
+  .badge.warn { background: rgba(224, 168, 60, 0.16); color: #e8c37a; }
+  .badge.today { background: rgba(110, 168, 240, 0.16); color: #a8caf5; }
+  .badge.done { background: rgba(38, 150, 132, 0.16); color: #7fd7c6; }
+
+  .score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    box-shadow: inset 0 0 0 1px var(--hairline-soft);
+  }
+
+  .score.CRITICAL { background: rgba(224, 90, 76, 0.18); color: #f0a094; }
+  .score.HIGH { background: rgba(224, 168, 60, 0.18); color: #e8c37a; }
+  .score.MEDIUM { background: rgba(110, 168, 240, 0.16); color: #a8caf5; }
+  .score.LOW { background: rgba(199, 211, 234, 0.1); color: var(--ink-quiet); }
+
+  /* -------------------------------------------------------- workspace */
+
+  .workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+
+  @media (min-width: 900px) {
+    .workspace { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); }
+  }
+
+  .detail-title {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--ink-display);
+    margin: 0 0 4px;
+  }
+
+  .detail-meta { font-size: 12.5px; color: var(--ink-quiet); margin: 0 0 18px; }
+
+  .facts { display: flex; flex-direction: column; gap: 14px; margin: 0; }
+
+  .fact { display: flex; flex-direction: column; gap: 3px; }
+  .fact dt {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-quiet);
+  }
+  .fact dd { margin: 0; font-size: 14px; color: var(--ink-muted); }
+
+  /* Score explanation — the point of the priority engine is that it shows
+     its working, so the breakdown is a first-class part of the detail. */
+  .why {
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 12px;
+    background: rgba(102, 58, 243, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(102, 58, 243, 0.22);
+  }
+
+  .why h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #c0acff;
+    margin: 0 0 10px;
+  }
+
+  .why ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+
+  .why li {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--ink-muted);
+  }
+
+  .why .pts {
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: #c0acff;
+    min-width: 30px;
+    text-align: end;
+    flex: none;
+  }
+
+  /* --------------------------------------------------------- timeline */
+
+  .timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    inset-block: 8px;
+    inset-inline-start: 5px;
+    width: 1px;
+    background: var(--hairline);
+  }
+
+  .timeline li {
+    position: relative;
+    padding-inline-start: 24px;
+    padding-block: 9px;
+  }
+
+  .timeline li::before {
+    content: "";
+    position: absolute;
+    inset-inline-start: 1px;
+    top: 15px;
+    width: 9px;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--canvas);
+    box-shadow: 0 0 0 1px var(--hairline);
+  }
+
+  .timeline li.ai::before { background: var(--accent); box-shadow: 0 0 0 3px rgba(102, 58, 243, 0.2); }
+  .timeline li.key::before { background: var(--today); box-shadow: 0 0 0 3px rgba(110, 168, 240, 0.16); }
+
+  .timeline time {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-quiet);
+    display: block;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .timeline .what { font-size: 13.5px; color: var(--ink-muted); }
+  .timeline .note { font-size: 12.5px; color: var(--ink-quiet); }
+
+  /* ----------------------------------------------------------- footer */
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 22px;
+    font-size: 12px;
+    color: var(--ink-quiet);
+  }
+
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+
+  footer {
+    border-top: 1px solid var(--hairline);
+    padding-top: 20px;
+    font-size: 12.5px;
+    color: var(--ink-quiet);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  footer b { color: var(--ink-muted); font-weight: 500; }
+
+  :where(button, a, tr):focus-visible {
+    outline: 2px solid #b6d9fc;
+    outline-offset: 2px;
+  }
+
+  ::selection { background: rgba(102, 58, 243, 0.4); color: #fff; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+  }
+</style>
+
+<div class="shell">
+
+  <header class="masthead">
+    <div>
+      <p class="eyebrow">Coordination, measured</p>
+      <h1 class="wordmark">MeetingFlow</h1>
+      <p class="viewer-line" id="viewer-line"></p>
+    </div>
+    <p class="provenance">
+      תצוגה מקדימה של הממשק. כל מספר, שם ותאריך בעמוד הזה נלקחו
+      <b>ממסד הנתונים של המערכת</b>, מהרצה בתאריך <b id="stamp"></b>.
+      שום נתון כאן לא הומצא לצורך המצגת.
+    </p>
+  </header>
+
+  <div class="card">
+    <div class="card-head">
+      <div>
+        <h2>מי מסתכל על המסך</h2>
+        <p class="sub">אותו מסך בדיוק, שני תפקידים. ההרשאות משנות מה נראה.</p>
+      </div>
+      <div class="roles" role="group" aria-label="בחירת תפקיד">
+        <button type="button" data-role="coordinator" aria-pressed="true">מתאמת פגישות</button>
+        <button type="button" data-role="employee" aria-pressed="false">עובד</button>
+      </div>
+    </div>
+    <p class="sub" id="role-explainer" style="margin:0"></p>
+  </div>
+
+  <section aria-label="מדדים">
+    <div class="rings" id="rings"></div>
+  </section>
+
+  <section class="card">
+    <h2>דורש את תשומת לבך</h2>
+    <p class="sub">מחושב מהנתונים לפי זמני הטיפול שהוגדרו לארגון. לא הערכה.</p>
+    <div class="attention" id="attention"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 id="table-title">מרכז העבודה</h2>
+        <p class="sub" id="table-sub"></p>
+      </div>
+      <button type="button" class="ring" id="clear-filter" style="display:none;padding:8px 16px;flex-direction:row">
+        <span class="label">נקה סינון</span>
+      </button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>בקשה</th>
+            <th>איש קשר</th>
+            <th>נושא</th>
+            <th>סטטוס</th>
+            <th>מתאם מטפל</th>
+            <th>פתוח</th>
+            <th>ללא פעילות</th>
+            <th>עדיפות</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="sub" style="margin:14px 0 0">
+      הטבלה מדורגת לפי ציון עדיפות מחושב, לא לפי תאריך. לחיצה על שורה פותחת את הבקשה.
+    </p>
+  </section>
+
+  <section class="workspace" id="workspace">
+    <div class="card">
+      <h3 class="detail-title" id="detail-title"></h3>
+      <p class="detail-meta" id="detail-meta"></p>
+      <dl class="facts" id="detail-facts"></dl>
+      <div class="why" id="detail-why"></div>
+    </div>
+
+    <div class="card">
+      <h2>ציר זמן</h2>
+      <p class="sub">כל פעולה שנרשמה על הבקשה, לפי סדר כרונולוגי.</p>
+      <ul class="timeline" id="timeline"></ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>מקרא</h2>
+    <p class="sub">הצבע מסמן מצב, לא קישוט.</p>
+    <div class="legend">
+      <span><i class="dot late"></i> באיחור או חורג מזמן הטיפול</span>
+      <span><i class="dot warn"></i> דורש תשומת לב</span>
+      <span><i class="dot today"></i> מתקיים היום</span>
+      <span><i class="dot" style="background:var(--accent)"></i> פעולה של הבינה המלאכותית</span>
+    </div>
+  </section>
+
+  <footer>
+    <p style="margin:0">
+      <b>מה זה:</b> תצוגה מקדימה של הממשק, לאישור עיצוב וזרימת עבודה.
+      הנתונים אמיתיים ומגיעים מהמערכת.
+    </p>
+    <p style="margin:0">
+      <b>מה זה עדיין לא:</b> המערכת החיה עם התחברות משתמשים, שמירת נתונים
+      וחיבור לדואר וליומן. אלה קיימים בקוד ורצים מקומית.
+    </p>
+  </footer>
+</div>
+
+<script>
+  const DATA = __DEMO_DATA__;
+
+  // ---------------------------------------------------------------- labels
+
+  const STATUS = {
+    NEW: "בקשה חדשה",
+    NEEDS_COORDINATION: "דורש תיאום",
+    IN_PROGRESS: "בטיפול",
+    WAITING_FOR_CONTACT: "ממתין לצד השני",
+    WAITING_FOR_EMPLOYEE: "ממתין למידע מהעובד",
+    SCHEDULED: "נקבעה",
+    RESCHEDULE_REQUESTED: "נדרש שינוי מועד",
+    RESCHEDULED: "נקבע מועד חדש",
+    SUMMARY_REQUIRED: "ממתין לסיכום",
+    COMPLETED: "הסתיימה",
+    CANCELLED: "בוטלה",
+    DECLINED: "הצד השני סירב",
+  };
+
+  const TYPE = { IN_PERSON: "פגישה", PHONE: "שיחת טלפון", VIDEO: "פגישת וידאו" };
+  const PRIORITY = { NORMAL: "רגילה", HIGH: "גבוהה", URGENT: "דחופה" };
+
+  const ACTIVITY = {
+    REQUEST_CREATED: (a) => `${a} פתח בקשה`,
+    ASSIGNED: (a) => `${a} לקח את הבקשה לטיפול`,
+    REASSIGNED: (a) => `${a} הקצה את הבקשה מחדש`,
+    CONTACT_ATTEMPT: (a) => `${a} ניסה ליצור קשר`,
+    EMAIL_SENT: (a) => `${a} שלח דואר`,
+    REPLY_RECEIVED: () => "התקבלה תשובה",
+    OPTIONS_OFFERED: (a) => `${a} הציע מועדים`,
+    SCHEDULED: (a) => `${a} קבע את הפגישה`,
+    RESCHEDULED: (a) => `${a} שינה את המועד`,
+    CANCELLED: (a) => `${a} ביטל את הבקשה`,
+    DECLINED: (a) => `${a} סימן שהצד השני סירב`,
+    INFO_REQUESTED: (a) => `${a} ביקש מידע נוסף מהעובד`,
+    INFO_PROVIDED: (a) => `${a} השלים מידע`,
+    NOTE: (a) => `${a} הוסיף הערה`,
+    STATUS_CHANGED: (a) => `${a} שינה סטטוס`,
+    COMPLETED: () => "הפגישה הסתיימה",
+    SUMMARY_SUBMITTED: (a) => `${a} מילא סיכום`,
+    AI_SUGGESTED: () => "הבינה המלאכותית הציעה פעולה",
+    AI_EDITED: (a) => `${a} ערך את ההצעה`,
+    AI_APPROVED: (a) => `${a} אישר את ההצעה`,
+    AI_REJECTED: (a) => `${a} דחה את ההצעה`,
+  };
+
+  const OUTCOME = {
+    NO_ANSWER: "אין מענה",
+    LEFT_MESSAGE: "הושארה הודעה",
+    ANSWERED: "נענה",
+    BOUNCED: "הדואר חזר",
+    POSITIVE: "תגובה חיובית",
+    NEGATIVE: "תגובה שלילית",
+  };
+
+  const CHANNEL = {
+    PHONE: "טלפון", EMAIL: "דואר", WHATSAPP: "וואטסאפ",
+    SMS: "מסרון", LINKEDIN: "לינקדאין", IN_SYSTEM: "במערכת", OTHER: "אחר",
+  };
+
+  // Each factor the priority engine can contribute, in the user's language.
+  const FACTOR = {
+    requesterPriority: () => "העדיפות שהעובד הגדיר",
+    openFor: (p) => `הבקשה פתוחה ${p.days} ימים`,
+    noActivity: (p) => `אין פעילות כבר ${p.days} ימים`,
+    desiredDatePassed: () => "המועד שהעובד ביקש כבר עבר",
+    desiredDateNear: (p) => `המועד המבוקש בעוד ${p.days} ימים`,
+    meetingSoon: (p) => `הפגישה בעוד ${p.hours} שעות`,
+    attemptsWithoutReply: (p) => `${p.count} ניסיונות קשר ללא מענה`,
+    keyAccount: (p) => `${p.count} בקשות מול אותה חברה`,
+    slaBreached: () => "חריגה מזמן הטיפול שהוגדר",
+    slaAtRisk: () => "מתקרב לחריגה מזמן הטיפול",
+    awaitingCoordinator: () => "עדיין לא נלקחה לטיפול",
+    blockedOnEmployee: (p) => `ממתין למידע מהעובד ${p.days} ימים`,
+    summaryOverdue: (p) => `הפגישה הסתיימה לפני ${p.days} ימים ואין סיכום`,
+  };
+
+  const BOOKED = ["SCHEDULED", "RESCHEDULED"];
+  const OPEN = ["NEW", "NEEDS_COORDINATION", "IN_PROGRESS", "WAITING_FOR_CONTACT",
+    "WAITING_FOR_EMPLOYEE", "RESCHEDULE_REQUESTED"];
+
+  // ---------------------------------------------------------------- state
+
+  // The employee view uses the product's real visibility rule: your own
+  // requests plus the ones you take part in. Nothing else.
+  const EMPLOYEE = "יונתן כהן";
+
+  let role = "coordinator";
+  let filter = null;
+  let selected = null;
+
+  const visible = () =>
+    role === "coordinator"
+      ? DATA.requests
+      : DATA.requests.filter(
+          (r) => r.requester === EMPLOYEE || (r.participants || []).includes(EMPLOYEE),
+        );
+
+  // ---------------------------------------------------------------- utils
+
+  const el = (tag, cls, text) => {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  };
+
+  const fmtDate = (iso) => {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit", year: "numeric" });
+  };
+
+  const fmtDateTime = (iso) => {
+    const d = new Date(iso);
+    return (
+      d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" }) +
+      " · " +
+      d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })
+    );
+  };
+
+  const slaClass = (r) => (r.sla === "RED" ? "late" : r.sla === "AMBER" ? "warn" : "");
+
+  // ------------------------------------------------------------ counters
+
+  function counters(rows) {
+    const startOfDay = new Date(); startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(); endOfDay.setHours(23, 59, 59, 999);
+
+    return {
+      needsCoordination: rows.filter((r) => ["NEW", "NEEDS_COORDINATION"].includes(r.status)).length,
+      inProgress: rows.filter((r) => r.status === "IN_PROGRESS").length,
+      waiting: rows.filter((r) => ["WAITING_FOR_CONTACT", "WAITING_FOR_EMPLOYEE"].includes(r.status)).length,
+      scheduled: rows.filter((r) => BOOKED.includes(r.status)).length,
+      today: rows.filter((r) => {
+        if (!BOOKED.includes(r.status) || !r.scheduledAt) return false;
+        const t = new Date(r.scheduledAt);
+        return t >= startOfDay && t <= endOfDay;
+      }).length,
+      completed: rows.filter((r) => r.status === "COMPLETED").length,
+    };
+  }
+
+  function attention(rows) {
+    const out = [];
+
+    // Same thresholds and the same precision as the product: compare against a
+    // timestamp, not a rounded day count, so these numbers match the app exactly.
+    const hoursAgo = (h) => Date.now() - h * 3600000;
+    const daysAgo = (d) => Date.now() - d * 86400000;
+
+    const untouched = rows.filter(
+      (r) => ["NEW", "NEEDS_COORDINATION"].includes(r.status) &&
+        new Date(r.createdAt).getTime() < hoursAgo(4),
+    );
+    const noReply = rows.filter(
+      (r) => r.status === "WAITING_FOR_CONTACT" &&
+        new Date(r.lastActivityAt).getTime() < daysAgo(3),
+    );
+    const todayRows = rows.filter((r) => {
+      if (!BOOKED.includes(r.status) || !r.scheduledAt) return false;
+      const t = new Date(r.scheduledAt);
+      const s = new Date(); s.setHours(0, 0, 0, 0);
+      const e = new Date(); e.setHours(23, 59, 59, 999);
+      return t >= s && t <= e;
+    });
+    const noSummary = rows.filter((r) => r.status === "SUMMARY_REQUIRED");
+    const stale = rows.filter(
+      (r) => OPEN.includes(r.status) && r.status !== "NEW" &&
+        new Date(r.lastActivityAt).getTime() < daysAgo(2),
+    );
+
+    if (untouched.length) out.push({ tone: "late", n: untouched.length, text: "בקשות לא טופלו יותר מ־4 שעות", set: untouched });
+    if (noReply.length) out.push({ tone: "warn", n: noReply.length, text: "אנשי קשר לא ענו יותר מ־3 ימים", set: noReply });
+    if (todayRows.length) out.push({ tone: "today", n: todayRows.length, text: "פגישות מתקיימות היום", set: todayRows });
+    if (noSummary.length) out.push({ tone: "warn", n: noSummary.length, text: "פגישות הסתיימו ועדיין אין להן סיכום", set: noSummary });
+    if (stale.length) out.push({ tone: "warn", n: stale.length, text: "בקשות בטיפול ללא פעילות מעל יומיים", set: stale });
+
+    return out;
+  }
+
+  // -------------------------------------------------------------- render
+
+  const RING_DEFS = [
+    { key: "needsCoordination", label: "דורשות תיאום", tone: "var(--late)", match: (r) => ["NEW", "NEEDS_COORDINATION"].includes(r.status) },
+    { key: "inProgress", label: "בטיפול", tone: "var(--today)", match: (r) => r.status === "IN_PROGRESS" },
+    { key: "waiting", label: "ממתינות לתשובה", tone: "var(--warn)", match: (r) => ["WAITING_FOR_CONTACT", "WAITING_FOR_EMPLOYEE"].includes(r.status) },
+    { key: "scheduled", label: "נקבעו", tone: "var(--done)", match: (r) => BOOKED.includes(r.status) },
+    { key: "today", label: "היום", tone: "var(--today)", match: (r) => {
+        if (!BOOKED.includes(r.status) || !r.scheduledAt) return false;
+        const t = new Date(r.scheduledAt);
+        const s = new Date(); s.setHours(0, 0, 0, 0);
+        const e = new Date(); e.setHours(23, 59, 59, 999);
+        return t >= s && t <= e;
+      } },
+    { key: "completed", label: "הסתיימו", tone: "var(--ink-quiet)", match: (r) => r.status === "COMPLETED" },
+  ];
+
+  const R = 26;
+  const C = 2 * Math.PI * R;
+
+  function renderRings(rows) {
+    const c = counters(rows);
+    const total = Math.max(1, c.needsCoordination + c.inProgress + c.waiting + c.scheduled + c.completed);
+    const host = document.getElementById("rings");
+    host.replaceChildren();
+
+    RING_DEFS.forEach((def) => {
+      const value = c[def.key];
+      const share = Math.min(1, value / total);
+
+      const btn = el("button", "ring");
+      btn.type = "button";
+      btn.setAttribute("aria-pressed", String(filter === def.key));
+      btn.setAttribute("aria-label", `${def.label}: ${value}`);
+
+      btn.innerHTML =
+        '<figure><svg viewBox="0 0 64 64" aria-hidden="true">' +
+        `<circle cx="32" cy="32" r="${R}" fill="none" stroke="rgba(186,215,247,0.12)" stroke-width="3"></circle>` +
+        `<circle cx="32" cy="32" r="${R}" fill="none" stroke="${def.tone}" stroke-width="3" stroke-linecap="round" ` +
+        `stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - share)).toFixed(2)}" ` +
+        'style="transition:stroke-dashoffset 700ms ease-out"></circle></svg>' +
+        `<span class="value" style="color:${def.tone}">${value}</span></figure>` +
+        `<span class="label">${def.label}</span>`;
+
+      btn.addEventListener("click", () => {
+        filter = filter === def.key ? null : def.key;
+        render();
+      });
+
+      host.append(btn);
+    });
+  }
+
+  function renderAttention(rows) {
+    const host = document.getElementById("attention");
+    host.replaceChildren();
+    const items = attention(rows);
+
+    if (!items.length) {
+      host.append(el("p", "sub", "אין כרגע פריטים שדורשים טיפול מיידי."));
+      return;
+    }
+
+    items.forEach((item) => {
+      const btn = el("button");
+      btn.type = "button";
+      btn.append(el("i", "dot " + item.tone));
+      const count = el("span", "count", String(item.n));
+      const text = el("span", null, " " + item.text);
+      const wrap = el("span");
+      wrap.append(count, text);
+      btn.append(wrap, el("span", "go", "‹"));
+      btn.addEventListener("click", () => {
+        selected = item.set.slice().sort((a, b) => b.score - a.score)[0] || null;
+        render();
+        document.getElementById("workspace").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      host.append(btn);
+    });
+  }
+
+  function renderTable(rows) {
+    const def = RING_DEFS.find((d) => d.key === filter);
+    const shown = (def ? rows.filter(def.match) : rows)
+      .slice()
+      .sort((a, b) => b.score - a.score);
+
+    document.getElementById("table-title").textContent =
+      role === "coordinator" ? "מרכז העבודה של המתאמת" : "הפגישות שלי";
+    document.getElementById("table-sub").textContent =
+      `${shown.length} בקשות` + (def ? ` · מסונן לפי ${def.label}` : "");
+
+    const clear = document.getElementById("clear-filter");
+    clear.style.display = def ? "inline-flex" : "none";
+
+    const body = document.getElementById("rows");
+    body.replaceChildren();
+
+    shown.slice(0, 14).forEach((r) => {
+      const tr = el("tr");
+      tr.tabIndex = 0;
+      tr.setAttribute("aria-selected", String(selected && selected.number === r.number));
+
+      const cell = (cls) => { const td = el("td", cls); tr.append(td); return td; };
+
+      cell("num").textContent = r.number;
+
+      const contact = cell();
+      contact.append(el("div", "who", r.contact), el("div", "where", r.company || "—"));
+
+      cell("subject").textContent = r.subject;
+
+      const status = cell();
+      const badge = el("span", "badge " + slaClass(r), STATUS[r.status] || r.status);
+      status.append(badge);
+
+      const coord = cell();
+      coord.append(
+        r.coordinator
+          ? el("span", null, r.coordinator)
+          : el("span", "quiet", "לא משויך"),
+      );
+
+      cell("num").textContent = r.openDays + " ימים";
+      const idle = cell("num");
+      idle.textContent = r.idleDays + " ימים";
+      if (r.idleDays > 3) idle.className = "num";
+
+      const sc = cell();
+      sc.append(el("span", "score " + r.band, String(r.score)));
+
+      const open = () => { selected = r; render(); };
+      tr.addEventListener("click", open);
+      tr.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+      });
+
+      body.append(tr);
+    });
+  }
+
+  function renderDetail() {
+    const r = selected;
+    if (!r) return;
+
+    document.getElementById("detail-title").textContent = `בקשה ${r.number} · ${r.subject}`;
+    document.getElementById("detail-meta").textContent =
+      `${TYPE[r.type]} · עדיפות ${PRIORITY[r.priority]} · ${STATUS[r.status]}`;
+
+    const facts = document.getElementById("detail-facts");
+    facts.replaceChildren();
+
+    const add = (label, value) => {
+      const wrap = el("div", "fact");
+      wrap.append(el("dt", null, label), el("dd", null, value || "—"));
+      facts.append(wrap);
+    };
+
+    add("איש קשר", `${r.contact}${r.jobTitle ? " · " + r.jobTitle : ""}`);
+    add("חברה", r.company);
+    add("טלפון", r.phone);
+    add("נפתחה על ידי", r.requester);
+    add("מטופלת על ידי", r.coordinator || "עדיין לא שויכה");
+    add("מטרת הפגישה", r.purpose);
+    add("נפתחה בתאריך", fmtDate(r.createdAt));
+    if (r.scheduledAt) add("מועד מתוכנן", fmtDateTime(r.scheduledAt));
+    if (r.participants && r.participants.length) add("משתתפים מהארגון", r.participants.join(", "));
+    if (r.summary) add("סיכום", r.summary);
+
+    const why = document.getElementById("detail-why");
+    why.replaceChildren();
+    const head = el("h3", null, `למה זה דחוף? ציון ${r.score} מתוך 100`);
+    why.append(head);
+
+    const list = el("ul");
+    (r.factors || []).forEach((f) => {
+      const li = el("li");
+      const label = FACTOR[f.key] ? FACTOR[f.key](f.params || {}) : f.key;
+      li.append(el("span", "pts", "+" + f.points), el("span", null, label));
+      list.append(li);
+    });
+    why.append(list);
+
+    if (!r.factors || !r.factors.length) {
+      why.append(el("p", "sub", "הבקשה סגורה, ולכן אינה מדורגת."));
+    }
+  }
+
+  function renderTimeline() {
+    const host = document.getElementById("timeline");
+    host.replaceChildren();
+    const r = selected;
+    if (!r) return;
+
+    if (!r.timeline.length) {
+      host.append(el("p", "sub", "עדיין לא נרשמה פעילות."));
+      return;
+    }
+
+    r.timeline.forEach((event) => {
+      const li = el("li");
+      if (String(event.type).startsWith("AI_")) li.className = "ai";
+      else if (["SCHEDULED", "REPLY_RECEIVED", "RESCHEDULED"].includes(event.type)) li.className = "key";
+
+      li.append(el("time", null, fmtDateTime(event.at)));
+
+      const actor = event.actor || "המערכת";
+      const build = ACTIVITY[event.type];
+      li.append(el("div", "what", build ? build(actor) : event.type));
+
+      const bits = [];
+      if (event.channel) bits.push(CHANNEL[event.channel] || event.channel);
+      if (event.outcome) bits.push(OUTCOME[event.outcome] || event.outcome);
+      if (event.body) bits.push(event.body);
+      if (bits.length) li.append(el("div", "note", bits.join(" · ")));
+
+      host.append(li);
+    });
+  }
+
+  function render() {
+    const rows = visible();
+
+    if (!selected || !rows.some((r) => r.number === selected.number)) {
+      selected = rows.slice().sort((a, b) => b.score - a.score)[0] || null;
+    }
+
+    document.getElementById("viewer-line").innerHTML =
+      role === "coordinator"
+        ? "מחוברת כ<b>דנה לוי</b> · מתאמת פגישות · אוטומטיקסי בע״מ"
+        : "מחובר כ<b>יונתן כהן</b> · עובד · אוטומטיקסי בע״מ";
+
+    document.getElementById("role-explainer").textContent =
+      role === "coordinator"
+        ? `המתאמת רואה את כל ${DATA.requests.length} הבקשות בארגון, ואת התפריט המלא.`
+        : `העובד רואה ${rows.length} בקשות בלבד — אלה שהוא פתח או משתתף בהן. שאר הבקשות אינן מגיעות לדפדפן שלו כלל.`;
+
+    renderRings(rows);
+    renderAttention(rows);
+    renderTable(rows);
+    renderDetail();
+    renderTimeline();
+  }
+
+  document.querySelectorAll(".roles button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      role = btn.dataset.role;
+      filter = null;
+      selected = null;
+      document.querySelectorAll(".roles button").forEach((other) =>
+        other.setAttribute("aria-pressed", String(other === btn)),
+      );
+      render();
+    });
+  });
+
+  document.getElementById("clear-filter").addEventListener("click", () => {
+    filter = null;
+    render();
+  });
+
+  document.getElementById("stamp").textContent = new Date(DATA.generatedAt).toLocaleDateString(
+    "he-IL",
+    { day: "numeric", month: "long", year: "numeric" },
+  );
+
+  render();
+</script>
