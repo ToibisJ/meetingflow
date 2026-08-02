@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:up": "prisma dev -d -n meetingflow",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "verify:isolation": "tsx scripts/verify-isolation.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
