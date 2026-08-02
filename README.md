@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MeetingFlow
 
-## Getting Started
+מערכת לניהול ותיאום פגישות ושיחות בארגון.
 
-First, run the development server:
+המערכת מנהלת את כל מחזור החיים של פגישה: בקשה, תיאום, מעקב, ביצוע, סיכום והיסטוריה.
+היא נבנית מראש כמערכת רב־ארגונית, כך שכל ארגון הוא דייר נפרד ולעולם אינו רואה מידע של ארגון אחר.
+
+---
+
+## מחסנית טכנולוגית
+
+```text
+Next.js 15 (App Router) + TypeScript
+Tailwind CSS v4
+PostgreSQL + Prisma 7 (driver adapter: @prisma/adapter-pg)
+Zod            — ולידציה
+next-intl      — ריבוי שפות
+bcryptjs       — גיבוב סיסמאות
+```
+
+---
+
+## התקנה מקומית
+
+שלב ראשון — התקנת חבילות:
+
+```bash
+npm install
+```
+
+שלב שני — יצירת קובץ משתני סביבה:
+
+```bash
+copy .env.example .env
+```
+
+שלב שלישי — מילוי מחרוזת ההתחברות למסד הנתונים בתוך הקובץ:
+
+```text
+.env
+```
+
+שלב רביעי — יצירת הטבלאות:
+
+```bash
+npx prisma migrate dev
+```
+
+שלב חמישי — הרצת השרת:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+הכתובת המקומית:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## מבנה התיקיות
 
-To learn more about Next.js, take a look at the following resources:
+```text
+prisma/schema.prisma     סכמת מסד הנתונים
+prisma.config.ts         הגדרות Prisma 7 והנתיב למסד הנתונים
+src/app/                 מסכים ונתיבים
+src/app/globals.css      טוקני מערכת העיצוב
+src/lib/db.ts            חיבור למסד הנתונים, ללא סינון ארגון
+src/generated/prisma/    לקוח Prisma שנוצר אוטומטית, אינו נשמר בגיט
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## עקרונות שאסור לשבור
 
-## Deploy on Vercel
+**בידוד בין ארגונים.** אין גישה ישירה למסד הנתונים משום מקום במוצר.
+כל שאילתה עוברת דרך לקוח שמוזרק לו מזהה הארגון של המשתמש המחובר.
+הקובץ הבא מותר לשימוש ישיר רק בהתחברות, בזריעת נתונים ובמשימות רקע:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+src/lib/db.ts
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**מכונת מצבים אחת.** אין מקום בקוד שמעדכן סטטוס בקשה ישירות.
+כל מעבר עובר דרך פונקציית מעבר אחת שבודקת חוקיות, בודקת הרשאה, כותבת אירוע
+בציר הזמן, כותבת יומן ביקורת ושולחת התראה.
+
+**יומן ביקורת אוטומטי.** התיעוד אינו נכתב ידנית בכל פונקציה, אלא בשכבת השירותים,
+כך שאי אפשר לשכוח לתעד שינוי.
+
+**עיצוב.** מקור האמת לעיצוב הוא:
+
+```text
+C:\Claude\DESIGN.md
+```
+
+הכיוון הוא זכוכית מחוספסת בחצות: רקע כמעט שחור, טקסט כחול־לבן, גבולות שיער
+פנימיים בלבד, וסגול יחיד כצבע פעולה. אין להוסיף צבעים נוספים.
+
+---
+
+## יומן התקדמות
+
+### שלב 1 — שלד ומערכת עיצוב
+
+בוצע:
+
+- הוקם פרויקט חדש עם ניתוב, תמיכה בעברית מימין לשמאל ובניית ייצור תקינה.
+- נכתבה סכמת מסד הנתונים המלאה: 14 טבלאות, 13 טיפוסי ערכים מוגדרים ואינדקסים.
+- הוטמעו טוקני מערכת העיצוב: צבעים, גופנים, מרווחים, פינות, צללים ורקע כחול הדפס.
+- נוצר חיבור למסד הנתונים דרך מתאם הנהג של Prisma 7.
+- הועלה לגיטהאב.
+
+נשאר פתוח:
+
+- מחרוזת ההתחברות למסד הנתונים בענן טרם התקבלה, ולכן הטבלאות טרם נוצרו בפועל.

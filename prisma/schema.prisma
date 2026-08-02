@@ -1,0 +1,535 @@
+// MeetingFlow — Prisma schema
+// Multi-tenant SaaS. Every content table carries organizationId.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------- enums
+
+enum Role {
+  ADMIN
+  MANAGER
+  COORDINATOR
+  EMPLOYEE
+}
+
+enum MeetingType {
+  IN_PERSON
+  PHONE
+  VIDEO
+}
+
+enum Priority {
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum RequestStatus {
+  NEW
+  NEEDS_COORDINATION
+  IN_PROGRESS
+  WAITING_FOR_CONTACT
+  WAITING_FOR_EMPLOYEE
+  SCHEDULED
+  RESCHEDULE_REQUESTED
+  RESCHEDULED
+  SUMMARY_REQUIRED
+  COMPLETED
+  CANCELLED
+  DECLINED
+}
+
+enum SlaState {
+  GREEN
+  AMBER
+  RED
+}
+
+enum DatePreferenceMode {
+  EXACT
+  OPTIONS
+  RANGE
+  NONE
+}
+
+enum ActivityType {
+  REQUEST_CREATED
+  ASSIGNED
+  REASSIGNED
+  CONTACT_ATTEMPT
+  EMAIL_SENT
+  REPLY_RECEIVED
+  OPTIONS_OFFERED
+  SCHEDULED
+  RESCHEDULED
+  CANCELLED
+  DECLINED
+  INFO_REQUESTED
+  INFO_PROVIDED
+  NOTE
+  STATUS_CHANGED
+  COMPLETED
+  SUMMARY_SUBMITTED
+}
+
+enum ActivityChannel {
+  PHONE
+  EMAIL
+  WHATSAPP
+  SMS
+  LINKEDIN
+  IN_SYSTEM
+  OTHER
+}
+
+enum ActivityOutcome {
+  NO_ANSWER
+  LEFT_MESSAGE
+  ANSWERED
+  BOUNCED
+  POSITIVE
+  NEGATIVE
+}
+
+enum MeetingStatus {
+  PLANNED
+  RESCHEDULED
+  HELD
+  NOT_HELD
+  CANCELLED
+}
+
+enum SummaryOutcome {
+  SUCCESS
+  FOLLOW_UP_NEEDED
+  NOT_RELEVANT
+  POSTPONED
+  ANOTHER_MEETING
+  OTHER
+}
+
+enum TaskStatus {
+  OPEN
+  DONE
+  CANCELLED
+}
+
+enum NotificationType {
+  REQUEST_ASSIGNED
+  MEETING_SCHEDULED
+  MEETING_RESCHEDULED
+  MEETING_CANCELLED
+  INFO_REQUESTED
+  SUMMARY_REQUIRED
+  FOLLOW_UP_REQUIRED
+  REQUEST_DECLINED
+  SLA_BREACH
+  TASK_ASSIGNED
+}
+
+enum Locale {
+  he
+  en
+}
+
+// ---------------------------------------------------------------- tenancy
+
+model Organization {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  timezone      String   @default("Asia/Jerusalem")
+  defaultLocale Locale   @default(he)
+  plan          String   @default("standard")
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  users         User[]
+  departments   Department[]
+  contacts      Contact[]
+  requests      MeetingRequest[]
+  meetings      Meeting[]
+  activities    Activity[]
+  summaries     MeetingSummary[]
+  followUpTasks FollowUpTask[]
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  settings      Setting[]
+
+  @@map("organizations")
+}
+
+model Department {
+  id             String   @id @default(cuid())
+  organizationId String
+  name           String
+  managerUserId  String?
+  createdAt      DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  manager      User?        @relation("DepartmentManager", fields: [managerUserId], references: [id], onDelete: SetNull)
+  members      User[]       @relation("DepartmentMembers")
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("departments")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  organizationId String
+  email          String
+  passwordHash   String
+  fullName       String
+  phone          String?
+  role           Role      @default(EMPLOYEE)
+  departmentId   String?
+  managerId      String?
+  locale         Locale    @default(he)
+  isActive       Boolean   @default(true)
+  lastLoginAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  department   Department?  @relation("DepartmentMembers", fields: [departmentId], references: [id], onDelete: SetNull)
+  manager      User?        @relation("UserManager", fields: [managerId], references: [id], onDelete: SetNull)
+  reports      User[]       @relation("UserManager")
+
+  managedDepartments Department[]         @relation("DepartmentManager")
+  sessions           Session[]
+  createdContacts    Contact[]            @relation("ContactCreatedBy")
+  requestedRequests  MeetingRequest[]     @relation("RequestRequester")
+  assignedRequests   MeetingRequest[]     @relation("RequestCoordinator")
+  participations     MeetingParticipant[]
+  activities         Activity[]
+  createdMeetings    Meeting[]            @relation("MeetingCreatedBy")
+  submittedSummaries MeetingSummary[]     @relation("SummarySubmittedBy")
+  assignedTasks      FollowUpTask[]       @relation("TaskAssignee")
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+  updatedSettings    Setting[]            @relation("SettingUpdatedBy")
+
+  @@unique([organizationId, email])
+  @@index([organizationId])
+  @@index([organizationId, role])
+  @@index([managerId])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  ip        String?
+  userAgent String?
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+// ---------------------------------------------------------------- content
+
+model Contact {
+  id              String   @id @default(cuid())
+  organizationId  String
+  fullName        String
+  company         String?
+  jobTitle        String?
+  phone           String?
+  phoneAlt        String?
+  email           String?
+  website         String?
+  linkedin        String?
+  notes           String?
+  createdByUserId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User?            @relation("ContactCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  requests     MeetingRequest[]
+
+  @@index([organizationId])
+  @@index([organizationId, company])
+  @@index([organizationId, fullName])
+  @@map("contacts")
+}
+
+model MeetingRequest {
+  id             String @id @default(cuid())
+  organizationId String
+  requestNumber  Int
+
+  type     MeetingType
+  priority Priority      @default(NORMAL)
+  status   RequestStatus @default(NEW)
+  slaState SlaState      @default(GREEN)
+
+  contactId             String
+  requesterUserId       String
+  assignedCoordinatorId String?
+
+  subject        String
+  purpose        String?
+  description    String?
+  desiredOutcome String?
+
+  hadPriorContact   Boolean @default(false)
+  priorContactBy    String?
+  priorContactNotes String?
+
+  datePreferenceMode DatePreferenceMode @default(NONE)
+  preferredDate      DateTime?
+  preferredTime      String?
+  rangeStart         DateTime?
+  rangeEnd           DateTime?
+
+  firstTouchAt   DateTime?
+  lastActivityAt DateTime  @default(now())
+  scheduledAt    DateTime?
+  closedAt       DateTime?
+
+  parentRequestId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Restrict)
+  requester    User         @relation("RequestRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
+  coordinator  User?        @relation("RequestCoordinator", fields: [assignedCoordinatorId], references: [id], onDelete: SetNull)
+
+  parentRequest MeetingRequest?  @relation("RequestFollowUp", fields: [parentRequestId], references: [id], onDelete: SetNull)
+  childRequests MeetingRequest[] @relation("RequestFollowUp")
+
+  dateOptions  RequestDateOption[]
+  participants MeetingParticipant[]
+  meetings     Meeting[]
+  activities   Activity[]
+  summaries    MeetingSummary[]
+  tasks        FollowUpTask[]
+
+  @@unique([organizationId, requestNumber])
+  @@index([organizationId])
+  @@index([organizationId, status])
+  @@index([organizationId, assignedCoordinatorId])
+  @@index([organizationId, requesterUserId])
+  @@index([organizationId, slaState])
+  @@index([organizationId, createdAt])
+  @@map("meeting_requests")
+}
+
+model RequestDateOption {
+  id         String   @id @default(cuid())
+  requestId  String
+  rank       Int      @default(0)
+  optionDate DateTime
+  optionTime String?
+  note       String?
+
+  request MeetingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@map("request_date_options")
+}
+
+model MeetingParticipant {
+  id          String  @id @default(cuid())
+  requestId   String
+  userId      String
+  isOrganizer Boolean @default(false)
+
+  request MeetingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, userId])
+  @@index([userId])
+  @@map("meeting_participants")
+}
+
+model Meeting {
+  id             String @id @default(cuid())
+  organizationId String
+  requestId      String
+
+  scheduledStart DateTime
+  scheduledEnd   DateTime
+  timezone       String        @default("Asia/Jerusalem")
+  location       String?
+  meetingUrl     String?
+  dialNumber     String?
+  status         MeetingStatus @default(PLANNED)
+
+  rescheduledFromMeetingId String?
+  createdByUserId          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request      MeetingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  createdBy    User?          @relation("MeetingCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  rescheduledFrom Meeting?  @relation("MeetingReschedule", fields: [rescheduledFromMeetingId], references: [id], onDelete: SetNull)
+  rescheduledTo   Meeting[] @relation("MeetingReschedule")
+
+  summaries MeetingSummary[]
+
+  @@index([organizationId])
+  @@index([organizationId, scheduledStart])
+  @@index([requestId])
+  @@map("meetings")
+}
+
+model Activity {
+  id             String  @id @default(cuid())
+  organizationId String
+  requestId      String
+  actorUserId    String?
+
+  type    ActivityType
+  channel ActivityChannel?
+  outcome ActivityOutcome?
+  body    String?
+
+  occurredAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request      MeetingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actor        User?          @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([requestId, occurredAt])
+  @@map("activities")
+}
+
+model MeetingSummary {
+  id             String  @id @default(cuid())
+  organizationId String
+  requestId      String
+  meetingId      String?
+
+  submittedByUserId    String?
+  tookPlace            Boolean
+  summary              String
+  outcome              SummaryOutcome
+  needsFollowupMeeting Boolean        @default(false)
+  followupRequestId    String?
+
+  submittedAt DateTime @default(now())
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request      MeetingRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  meeting      Meeting?       @relation(fields: [meetingId], references: [id], onDelete: SetNull)
+  submittedBy  User?          @relation("SummarySubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+
+  tasks FollowUpTask[]
+
+  @@index([organizationId])
+  @@index([requestId])
+  @@map("meeting_summaries")
+}
+
+model FollowUpTask {
+  id             String  @id @default(cuid())
+  organizationId String
+  requestId      String
+  summaryId      String?
+
+  description    String
+  assigneeUserId String?
+  dueDate        DateTime?
+  status         TaskStatus @default(OPEN)
+  completedAt    DateTime?
+
+  createdAt DateTime @default(now())
+
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request      MeetingRequest  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  summary      MeetingSummary? @relation(fields: [summaryId], references: [id], onDelete: SetNull)
+  assignee     User?           @relation("TaskAssignee", fields: [assigneeUserId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([organizationId, assigneeUserId, status])
+  @@map("follow_up_tasks")
+}
+
+model Notification {
+  id             String @id @default(cuid())
+  organizationId String
+  userId         String
+
+  type       NotificationType
+  title      String
+  body       String?
+  entityType String?
+  entityId   String?
+
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id             String  @id @default(cuid())
+  organizationId String
+  userId         String?
+  userName       String
+
+  occurredAt DateTime @default(now())
+
+  entity   String
+  entityId String
+  action   String
+  field    String?
+  oldValue String?
+  newValue String?
+
+  ip        String?
+  userAgent String?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, occurredAt])
+  @@index([organizationId, entity, entityId])
+  @@map("audit_logs")
+}
+
+model Setting {
+  id              String   @id @default(cuid())
+  organizationId  String
+  key             String
+  valueJson       Json
+  updatedByUserId String?
+  updatedAt       DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  updatedBy    User?        @relation("SettingUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([organizationId, key])
+  @@index([organizationId])
+  @@map("settings")
+}

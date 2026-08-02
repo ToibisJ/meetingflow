@@ -1,26 +1,220 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   MeetingFlow design system
+   Source of truth: C:\Claude\DESIGN.md — "Frosted glass cathedral at midnight"
+   Dark-first. Monochromatic blue-white on near-black, one violet accent.
+   ------------------------------------------------------------------ */
+
+@theme {
+  /* Colors */
+  --color-midnight-canvas: #05060f;
+  --color-steel-plate: #2f343e;
+  --color-fog-veil: #9da7ba;
+  --color-moon-mist: #c7d3ea;
+  --color-frost-glow: #d1e4fa;
+  --color-ice-highlight: #d8ecf8;
+  --color-pure-white: #ffffff;
+  --color-void-violet: #663af3;
+  --color-blueprint-blue: #b6d9fc;
+  --color-ember-glow: #e46d4c;
+  --color-signal-blue: #027dea;
+  --color-deep-teal: #269684;
+  --color-gridline-blue: #3f4959;
+  --color-glass-edge: #bad7f71f;
+  --color-luminous-fill: #c7d3ea1f;
+
+  /* Surfaces */
+  --color-surface-glass: rgba(186, 214, 247, 0.03);
+  --color-surface-raised: rgba(186, 214, 247, 0.06);
+  --color-surface-deep: rgba(5, 6, 15, 0.97);
+
+  /* Typography — families */
+  --font-sans: var(--font-untitled-sans);
+  --font-display: var(--font-aeonikpro);
+  --font-eyebrow: var(--font-dotdigital);
+
+  /* Typography — scale */
+  --text-caption: 12px;
+  --text-caption--line-height: 1.33;
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.43;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: -0.16px;
+  --text-subheading: 18px;
+  --text-subheading--line-height: 1.33;
+  --text-heading-sm: 24px;
+  --text-heading-sm--line-height: 1.17;
+  --text-heading-sm--letter-spacing: -0.24px;
+  --text-heading: 28px;
+  --text-heading--line-height: 1.14;
+  --text-heading-lg: 44px;
+  --text-heading-lg--line-height: 1.16;
+  --text-display: 48px;
+  --text-display--line-height: 1.17;
+
+  /* Spacing */
+  --spacing-4: 4px;
+  --spacing-8: 8px;
+  --spacing-12: 12px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-36: 36px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-56: 56px;
+  --spacing-100: 100px;
+  --spacing-120: 120px;
+  --spacing-200: 200px;
+
+  /* Radius — never mix families on one component type */
+  --radius-cards: 16px;
+  --radius-badges: 6px;
+  --radius-inputs: 6px;
+  --radius-modals: 16px;
+  --radius-buttons: 999px;
+  --radius-iconcontainers: 9999px;
+
+  /* Shadows */
+  --shadow-sm: rgba(186, 207, 247, 0.32) 0px 0px 6px 0px;
+  --shadow-md: rgba(238, 186, 247, 0.24) 0px 0px 12px 0px;
+  --shadow-hairline: rgba(186, 215, 247, 0.12) 0px 0px 0px 1px inset;
+  --shadow-hairline-soft: rgba(186, 214, 247, 0.06) 0px 0px 0px 1px inset;
+  --shadow-hairline-strong: rgba(186, 214, 247, 0.24) 0px 0px 0px 1px inset;
+  --shadow-card: rgba(199, 211, 234, 0.12) 0px 1px 1px 0px inset,
+    rgba(199, 211, 234, 0.05) 0px 24px 48px 0px inset,
+    rgba(6, 6, 14, 0.7) 0px 24px 32px 0px;
+  --shadow-modal: rgba(216, 236, 248, 0.2) 0px 1px 1px 0px inset,
+    rgba(168, 216, 245, 0.06) 0px 24px 48px 0px inset,
+    rgba(0, 0, 0, 0.3) 0px 16px 32px 0px;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --page-max-width: 1200px;
+  --section-gap: 120px;
+  --card-padding: 24px;
+  --element-gap: 16px;
+
+  /* Status hues — used only for status dots and badges, never as surfaces */
+  --status-ok: #269684;
+  --status-warn: #e0a83c;
+  --status-late: #e05a4c;
+  --status-info: #6ea8f0;
+  --status-idle: #9da7ba;
+
+  --gradient-skywash: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
+
+  color-scheme: dark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  border-color: rgba(186, 215, 247, 0.12);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  background-color: var(--color-midnight-canvas);
+  color: var(--color-frost-glow);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  letter-spacing: -0.16px;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Ambient blueprint grid + spotlight halo, behind every page */
+.mf-atmosphere::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+      to right,
+      rgba(186, 215, 247, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(to bottom, rgba(186, 215, 247, 0.06) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
+}
+
+.mf-atmosphere::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: conic-gradient(
+    at 50% -5%,
+    transparent 45%,
+    rgba(124, 145, 182, 0.3) 49%,
+    rgba(124, 145, 182, 0.5) 50%,
+    rgba(124, 145, 182, 0.3) 51%,
+    transparent 55%
+  );
+  opacity: 0.5;
+}
+
+/* Skywash gradient fill — display wordmark and largest headings only */
+.mf-skywash {
+  background: var(--gradient-skywash);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Frosted glass plate */
+.mf-glass {
+  background: var(--color-surface-glass);
+  border-radius: var(--radius-cards);
+  box-shadow: var(--shadow-card);
+}
+
+/* Focus ring — visible on every interactive element */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-blueprint-blue);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(102, 58, 243, 0.4);
+  color: #ffffff;
+}
+
+/* Scrollbars, tinted to the palette */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(186, 215, 247, 0.12);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(186, 215, 247, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
