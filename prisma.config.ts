@@ -9,5 +9,8 @@ export default defineConfig({
   },
   datasource: {
     url: process.env["DATABASE_URL"],
+    // Migrations are verified against a throwaway database first. Naming it
+    // explicitly keeps a failed attempt from poisoning the default one.
+    shadowDatabaseUrl: process.env["SHADOW_DATABASE_URL"],
   },
 });

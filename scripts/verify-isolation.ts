@@ -45,13 +45,16 @@ function tenantDb(organizationId: string) {
           if (UNSCOPED.has(model)) return query(args);
 
           const next = { ...(args as Record<string, unknown>) };
+          const scopeKey = model === "Organization" ? "id" : "organizationId";
 
           if (WHERE_OPS.has(operation)) {
             next.where = {
               ...((next.where as Record<string, unknown>) ?? {}),
-              organizationId,
+              [scopeKey]: organizationId,
             };
           }
+
+          if (model === "Organization") return query(next);
 
           if (CREATE_OPS.has(operation)) {
             if (next.create !== undefined) {

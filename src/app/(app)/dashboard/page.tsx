@@ -123,11 +123,35 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-8">
-      <header className="flex flex-col gap-2">
-        <Eyebrow>{t("dashboard.title")}</Eyebrow>
-        <h1 className="text-[28px] font-medium text-ice-highlight">
-          {t("dashboard.greeting", { name: ctx.session.fullName })}
-        </h1>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-2">
+          <Eyebrow>{t("dashboard.title")}</Eyebrow>
+          <h1 className="text-[28px] font-medium text-ice-highlight">
+            {t("dashboard.greeting", { name: ctx.session.fullName })}
+          </h1>
+        </div>
+
+        {/* The three places a person goes next, one click from the front door. */}
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/my-day"
+            className="rounded-[999px] bg-[rgba(186,214,247,0.06)] px-5 py-2.5 text-[13.5px] text-frost-glow shadow-[inset_0_0_0_1px_rgba(186,215,247,0.12)] hover:bg-[rgba(186,214,247,0.12)]"
+          >
+            {t("nav.myDay")}
+          </Link>
+          <Link
+            href="/requests"
+            className="rounded-[999px] bg-[rgba(186,214,247,0.06)] px-5 py-2.5 text-[13.5px] text-frost-glow shadow-[inset_0_0_0_1px_rgba(186,215,247,0.12)] hover:bg-[rgba(186,214,247,0.12)]"
+          >
+            {t("nav.allRequests")}
+          </Link>
+          <Link
+            href="/requests/new"
+            className="rounded-[999px] bg-void-violet px-5 py-2.5 text-[13.5px] font-medium text-pure-white hover:opacity-90"
+          >
+            {t("nav.newRequest")}
+          </Link>
+        </div>
       </header>
 
       <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
@@ -222,8 +246,13 @@ export default async function DashboardPage() {
                   key={request.id}
                   className="border-t border-[rgba(186,215,247,0.12)]"
                 >
-                  <td className="px-2 py-3 tabular-nums text-frost-glow">
-                    {request.requestNumber}
+                  <td className="px-2 py-3">
+                    <Link
+                      href={`/requests/${request.requestNumber}`}
+                      className="tabular-nums text-frost-glow underline-offset-4 hover:underline"
+                    >
+                      {request.requestNumber}
+                    </Link>
                   </td>
                   <td className="px-2 py-3 text-moon-mist">
                     <span className="block text-frost-glow">
@@ -233,8 +262,13 @@ export default async function DashboardPage() {
                       {request.contact.company}
                     </span>
                   </td>
-                  <td className="max-w-[220px] truncate px-2 py-3 text-moon-mist">
-                    {request.subject}
+                  <td className="max-w-[220px] px-2 py-3">
+                    <Link
+                      href={`/requests/${request.requestNumber}`}
+                      className="block truncate text-moon-mist hover:text-frost-glow"
+                    >
+                      {request.subject}
+                    </Link>
                   </td>
                   <td className="px-2 py-3">
                     <Badge

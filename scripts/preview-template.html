@@ -708,6 +708,7 @@
             <th>איש קשר</th>
             <th>נושא</th>
             <th>סטטוס</th>
+            <th>מועד הפגישה</th>
             <th>מתאם מטפל</th>
             <th>פתוח</th>
             <th>ללא פעילות</th>
@@ -870,17 +871,32 @@
   const fmtDate = (iso) => {
     if (!iso) return "—";
     return new Date(iso).toLocaleDateString("he-IL", {
-      day: "2-digit", month: "2-digit", year: "numeric",
+      weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
   };
 
+  /**
+   * A meeting slot. The weekday is the part a coordinator actually plans
+   * around, so it is spelled out rather than left to be worked out from
+   * the date, and the year is spelled out too so nothing is ambiguous.
+   */
+  const fmtMeeting = (iso) => {
+    const d = new Date(iso);
+    const day = d.toLocaleDateString("he-IL", { weekday: "long" });
+    const date = d.toLocaleDateString("he-IL", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+    const time = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    return `${day}, ${date} · ${time}`;
+  };
+
+  /** Timeline entries are dense, so they keep the short form plus the weekday. */
   const fmtDateTime = (iso) => {
     const d = new Date(iso);
-    return (
-      d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" }) +
-      " · " +
-      d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })
-    );
+    const day = d.toLocaleDateString("he-IL", { weekday: "short" });
+    const date = d.toLocaleDateString("he-IL", { day: "2-digit", month: "2-digit" });
+    const time = d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+    return `${day} ${date} · ${time}`;
   };
 
   const slaClass = (r) => (r.sla === "RED" ? "late" : r.sla === "AMBER" ? "warn" : "");
@@ -1044,7 +1060,7 @@
         r.status === "SUMMARY_REQUIRED"
           ? `${r.subject} · הסתיימה לפני ${r.idleDays} ימים`
           : BOOKED.includes(r.status) && r.scheduledAt
-            ? `${r.subject} · ${fmtDateTime(r.scheduledAt)}`
+            ? `${r.subject} · ${fmtMeeting(r.scheduledAt)}`
             : `${r.subject} · ללא פעילות ${r.idleDays} ימים`;
       main.append(el("span", null, detail));
       btn.append(main);
@@ -1132,6 +1148,23 @@
 
       cell().append(el("span", "badge " + slaClass(r), STATUS[r.status] || r.status));
 
+      const when = cell();
+      if (r.scheduledAt) {
+        const d = new Date(r.scheduledAt);
+        when.append(
+          el("div", "who", d.toLocaleDateString("he-IL", { weekday: "long" })),
+          el(
+            "div",
+            "where",
+            d.toLocaleDateString("he-IL", { day: "numeric", month: "long", year: "numeric" }) +
+              " · " +
+              d.toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }),
+          ),
+        );
+      } else {
+        when.append(el("span", "quiet", "טרם נקבע"));
+      }
+
       cell().append(
         r.coordinator ? el("span", null, r.coordinator) : el("span", "quiet", "לא משויך"),
       );
@@ -1174,7 +1207,7 @@
     add("מטופלת על ידי", r.coordinator || "עדיין לא שויכה");
     add("מטרת הפגישה", r.purpose);
     add("נפתחה בתאריך", fmtDate(r.createdAt));
-    if (r.scheduledAt) add("מועד מתוכנן", fmtDateTime(r.scheduledAt));
+    if (r.scheduledAt) add("מועד מתוכנן", fmtMeeting(r.scheduledAt));
     if (r.participants && r.participants.length) add("משתתפים מהארגון", r.participants.join(", "));
     if (r.summary) add("סיכום", r.summary);
 

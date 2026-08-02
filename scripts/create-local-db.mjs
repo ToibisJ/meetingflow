@@ -10,9 +10,18 @@ import { Client } from "pg";
 
 const adminUrl = process.argv[2];
 const dbName = process.argv[3] ?? "meetingflow";
+/**
+ * The local dev server's `template1` picks up whatever the first migration
+ * created, so anything cloned from it starts non-empty. Pass `template0` when
+ * the new database must be genuinely pristine — Prisma's shadow database is
+ * rejected unless it is.
+ */
+const template = process.argv[4] ?? null;
 
 if (!adminUrl) {
-  console.error("Usage: node scripts/create-local-db.mjs <admin connection url> [db name]");
+  console.error(
+    "Usage: node scripts/create-local-db.mjs <admin url> [db name] [template]",
+  );
   process.exit(1);
 }
 
@@ -24,8 +33,12 @@ const existing = await admin.query("select 1 from pg_database where datname = $1
 ]);
 
 if (existing.rowCount === 0) {
-  await admin.query(`create database "${dbName}"`);
-  console.log(`created database ${dbName}`);
+  await admin.query(
+    template
+      ? `create database "${dbName}" template "${template}"`
+      : `create database "${dbName}"`,
+  );
+  console.log(`created database ${dbName}${template ? ` from ${template}` : ""}`);
 } else {
   console.log(`database ${dbName} already exists`);
 }

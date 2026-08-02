@@ -168,7 +168,8 @@
     "nextActionSchedule": "Book a slot",
     "nextActionWaitEmployee": "Waiting on employee",
     "nextActionSummary": "Complete summary",
-    "nextActionNone": "Nothing to do"
+    "nextActionNone": "Nothing to do",
+    "notScheduledYet": "Not booked yet"
   },
 
   "newRequest": {
@@ -246,7 +247,49 @@
     "scheduleDuration": "Duration in minutes",
     "scheduleLocation": "Location",
     "scheduleUrl": "Meeting link",
-    "scheduleReason": "Reason for the change"
+    "scheduleReason": "Reason for the change",
+
+    "actionsTitle": "What happens next",
+    "actionsHint": "Every action is written to the timeline and the audit log.",
+    "actionReply": "Record a reply",
+    "replyTone": "Tone of the reply",
+    "replyPositive": "Positive",
+    "replyNegative": "Negative",
+    "replyText": "What they said",
+    "noteText": "The note",
+    "question": "What you are missing",
+    "answer": "The information they asked for",
+    "reason": "Reason",
+    "selectCoordinator": "Pick a coordinator",
+    "submit": "Save",
+    "submitting": "Saving",
+    "saved": "Saved",
+    "close": "Close",
+    "noActions": "No actions are available to you in the request's current state.",
+    "callNow": "Call",
+    "whatsapp": "WhatsApp",
+    "sendEmail": "Send email",
+    "contactCard": "Contact details",
+    "priorityScore": "Priority score",
+    "whyUrgent": "Why this is urgent",
+    "notRanked": "The request is closed and is not ranked.",
+    "backToList": "Back to the list"
+  },
+
+  "priorityFactor": {
+    "requesterPriority": "The priority the employee set",
+    "openFor": "Open for {days} days",
+    "noActivity": "No activity for {days} days",
+    "desiredDatePassed": "The date the employee asked for has passed",
+    "desiredDateNear": "The requested date is {days} days away",
+    "meetingSoon": "The meeting is in {hours} hours",
+    "attemptsWithoutReply": "{count} contact attempts with no reply",
+    "keyAccount": "{count} requests with the same company",
+    "slaBreached": "Past the agreed handling time",
+    "slaAtRisk": "Approaching the handling-time limit",
+    "awaitingCoordinator": "Nobody has picked it up yet",
+    "blockedOnEmployee": "Waiting on the employee for {days} days",
+    "summaryOverdue": "The meeting ended {days} days ago with no summary"
   },
 
   "activity": {
@@ -362,6 +405,44 @@
     "followUpCount": "Follow-up meetings",
     "hours": "hours",
     "days": "days"
+  },
+
+  "calendarSourceNote": "These are meetings booked inside MeetingFlow. Once a Google or Outlook account is connected, that calendar's busy blocks appear here too.",
+
+  "profile": {
+    "title": "My details",
+    "subtitle": "How coordinators and colleagues reach you.",
+    "fullName": "Full name",
+    "jobTitle": "Job title",
+    "email": "Email",
+    "emailHint": "Your sign-in address. Ask an administrator to change it.",
+    "phone": "Phone",
+    "whatsapp": "WhatsApp",
+    "whatsappHint": "International format, digits only. For example 972501234567",
+    "workStart": "Working day starts",
+    "workEnd": "Working day ends",
+    "save": "Save details",
+    "saving": "Saving",
+    "saved": "Details saved",
+
+    "connectionsTitle": "Connected accounts",
+    "connectionsSubtitle": "Mail and calendar, so the system knows what happened even when you worked outside it.",
+    "connect": "Connect account",
+    "disconnect": "Disconnect",
+    "reconnect": "Reconnect",
+    "statusCONNECTED": "Connected",
+    "statusDISCONNECTED": "Not connected",
+    "statusNOT_CONFIGURED": "Not configured on the server",
+    "statusNEEDS_ATTENTION": "Needs attention",
+    "statusEXPIRED": "Expired",
+    "lastSync": "Last sync",
+    "neverSynced": "Never synced",
+    "whatItDoes": "What this enables",
+    "notConfiguredTitle": "This integration is not switched on yet",
+    "notConfiguredBody": "It needs credentials created with the provider and placed in the environment file. Until then the button stays disabled on purpose, and no pretend connection is shown here.",
+    "missingVariables": "Missing variables",
+    "redirectUri": "Redirect URI to register with the provider",
+    "openConsole": "Open the credentials console"
   },
 
   "contacts": {

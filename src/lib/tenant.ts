@@ -26,6 +26,13 @@ const UNSCOPED_MODELS = new Set([
   "MeetingParticipant", // child of MeetingRequest
 ]);
 
+/**
+ * The organization row is its own tenant: its primary key IS the id every other
+ * table points at. It still gets filtered — just on `id` rather than on a
+ * column it does not have.
+ */
+const SELF_SCOPED_MODEL = "Organization";
+
 const WHERE_OPERATIONS = new Set([
   "findFirst",
   "findFirstOrThrow",
@@ -68,13 +75,18 @@ export function tenantDb(organizationId: string) {
           }
 
           const nextArgs = { ...(args as AnyArgs) };
+          const scopeKey = model === SELF_SCOPED_MODEL ? "id" : "organizationId";
 
           if (WHERE_OPERATIONS.has(operation)) {
             nextArgs.where = {
               ...((nextArgs.where as AnyArgs) ?? {}),
-              organizationId,
+              [scopeKey]: organizationId,
             };
           }
+
+          // Creating an organization is an onboarding action, not tenant work,
+          // so the guard never rewrites its data.
+          if (model === SELF_SCOPED_MODEL) return query(nextArgs);
 
           if (CREATE_OPERATIONS.has(operation)) {
             // upsert carries both `create` and `update`; create/createMany carry `data`

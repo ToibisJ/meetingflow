@@ -235,6 +235,8 @@ async function main() {
       passwordHash,
       fullName: "יונתן טויביס",
       phone: "052-2580507",
+      whatsapp: "972522580507",
+      jobTitle: "מנהל מערכות מידע",
       role: "ADMIN",
       departmentId: departments[2].id,
     },
@@ -247,6 +249,8 @@ async function main() {
       passwordHash,
       fullName: "רונית שפירא",
       phone: "054-4782707",
+      whatsapp: "972544782707",
+      jobTitle: "סמנכ\"לית מכירות",
       role: "MANAGER",
       departmentId: departments[0].id,
     },
@@ -259,8 +263,8 @@ async function main() {
 
   const coordinators = await Promise.all(
     [
-      { email: "dana@automatixy.co.il", fullName: "דנה לוי" },
-      { email: "amit@automatixy.co.il", fullName: "עמית ברק" },
+      { email: "dana@automatixy.co.il", fullName: "דנה לוי", phone: "053-7712804" },
+      { email: "amit@automatixy.co.il", fullName: "עמית ברק", phone: "053-7712805" },
     ].map((person) =>
       db.user.create({
         data: {
@@ -268,6 +272,9 @@ async function main() {
           email: person.email,
           passwordHash,
           fullName: person.fullName,
+          phone: person.phone,
+          whatsapp: "972" + person.phone.replace(/\D/g, "").slice(1),
+          jobTitle: "מתאם/ת פגישות",
           role: "COORDINATOR",
           departmentId: departments[1].id,
           managerId: manager.id,
@@ -279,13 +286,22 @@ async function main() {
   const employees = await Promise.all(
     Array.from({ length: 10 }, (_, index) => {
       const fullName = `${HE_FIRST_NAMES[index]} ${HE_LAST_NAMES[index]}`;
+      const phone = `05${intBetween(0, 8)}-${intBetween(1000000, 9999999)}`;
       return db.user.create({
         data: {
           organizationId: org.id,
           email: `employee${index + 1}@automatixy.co.il`,
           passwordHash,
           fullName,
-          phone: `05${intBetween(0, 8)}-${intBetween(1000000, 9999999)}`,
+          phone,
+          whatsapp: "972" + phone.replace(/\D/g, "").slice(1),
+          jobTitle: pick([
+            "מנהל תיקי לקוחות",
+            "איש מכירות",
+            "מנהל פרויקטים",
+            "אנליסט",
+            "מנהל תפעול",
+          ]),
           role: "EMPLOYEE",
           departmentId: pick(departments).id,
           managerId: manager.id,

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
 import {
   BarChart3,
   Bell,
@@ -12,6 +13,7 @@ import {
   ScrollText,
   Settings,
   Sun,
+  UserCircle2,
   Users,
 } from "lucide-react";
 
@@ -71,8 +73,16 @@ export default async function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { session } = await requireUser();
+  const { session, db } = await requireUser();
   const t = await getTranslations();
+  // Client components inside the shell translate with the same dictionary the
+  // server used, so a label never exists in two places.
+  const messages = await getMessages();
+
+  // The unread count sits in the shell so it is visible from every screen.
+  const unread = await db.notification.count({
+    where: { userId: session.id, isRead: false },
+  });
 
   const sections = SECTIONS.map((section) => ({
     ...section,
@@ -82,6 +92,7 @@ export default async function AppLayout({
   })).filter((section) => section.entries.length > 0);
 
   return (
+    <NextIntlClientProvider messages={messages}>
     <div className="relative z-10 flex min-h-screen">
       <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col gap-6 overflow-y-auto border-e border-[rgba(186,215,247,0.12)] px-4 py-6 lg:flex">
         <Link href="/dashboard" className="px-2">
@@ -104,6 +115,8 @@ export default async function AppLayout({
               </p>
               {section.entries.map((entry) => {
                 const Icon = entry.icon;
+                const badge = entry.href === "/notifications" && unread > 0 ? unread : null;
+
                 return (
                   <Link
                     key={entry.href}
@@ -114,7 +127,12 @@ export default async function AppLayout({
                     )}
                   >
                     <Icon size={16} className="shrink-0 opacity-70" />
-                    {t(entry.labelKey)}
+                    <span className="flex-1">{t(entry.labelKey)}</span>
+                    {badge ? (
+                      <span className="inline-flex min-w-[20px] items-center justify-center rounded-full bg-void-violet px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-pure-white">
+                        {badge}
+                      </span>
+                    ) : null}
                   </Link>
                 );
               })}
@@ -123,16 +141,27 @@ export default async function AppLayout({
         </nav>
 
         <div className="flex flex-col gap-2 border-t border-[rgba(186,215,247,0.12)] pt-4">
-          <div className="px-2">
-            <p className="text-[14px] text-frost-glow">{session.fullName}</p>
-            <p className="text-[12px] text-fog-veil">{t(`roles.${session.role}`)}</p>
-            <p className="text-[12px] text-fog-veil">{session.organizationName}</p>
-          </div>
+          {/* The user card is the way into personal details and connections. */}
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 rounded-[6px] px-2 py-2 transition-colors hover:bg-[rgba(186,214,247,0.06)]"
+          >
+            <UserCircle2 size={18} className="shrink-0 opacity-70" />
+            <span className="min-w-0">
+              <span className="block truncate text-[14px] text-frost-glow">
+                {session.fullName}
+              </span>
+              <span className="block truncate text-[12px] text-fog-veil">
+                {t(`roles.${session.role}`)} · {session.organizationName}
+              </span>
+            </span>
+          </Link>
           <SignOutButton label={t("common.signOut")} />
         </div>
       </aside>
 
       <main className="min-w-0 flex-1 px-6 py-8 lg:px-10">{children}</main>
     </div>
+    </NextIntlClientProvider>
   );
 }

@@ -168,7 +168,8 @@
     "nextActionSchedule": "קבע מועד",
     "nextActionWaitEmployee": "ממתין לעובד",
     "nextActionSummary": "השלם סיכום",
-    "nextActionNone": "אין פעולה נדרשת"
+    "nextActionNone": "אין פעולה נדרשת",
+    "notScheduledYet": "טרם נקבע"
   },
 
   "newRequest": {
@@ -246,7 +247,49 @@
     "scheduleDuration": "משך בדקות",
     "scheduleLocation": "מיקום",
     "scheduleUrl": "קישור לפגישה",
-    "scheduleReason": "סיבת השינוי"
+    "scheduleReason": "סיבת השינוי",
+
+    "actionsTitle": "מה עושים עכשיו",
+    "actionsHint": "כל פעולה נרשמת בציר הזמן וביומן הביקורת.",
+    "actionReply": "רשום תשובה שהתקבלה",
+    "replyTone": "אופי התשובה",
+    "replyPositive": "חיובית",
+    "replyNegative": "שלילית",
+    "replyText": "מה הוא אמר",
+    "noteText": "ההערה",
+    "question": "מה חסר לך",
+    "answer": "המידע שביקשו ממך",
+    "reason": "סיבה",
+    "selectCoordinator": "בחר מתאם",
+    "submit": "שמור",
+    "submitting": "שומר",
+    "saved": "נשמר",
+    "close": "סגור",
+    "noActions": "אין פעולות זמינות לך במצב הנוכחי של הבקשה.",
+    "callNow": "התקשר",
+    "whatsapp": "וואטסאפ",
+    "sendEmail": "שלח דואר",
+    "contactCard": "פרטי קשר",
+    "priorityScore": "ציון עדיפות",
+    "whyUrgent": "למה זה דחוף",
+    "notRanked": "הבקשה סגורה ואינה מדורגת.",
+    "backToList": "חזרה לרשימה"
+  },
+
+  "priorityFactor": {
+    "requesterPriority": "העדיפות שהעובד הגדיר",
+    "openFor": "הבקשה פתוחה {days} ימים",
+    "noActivity": "אין פעילות כבר {days} ימים",
+    "desiredDatePassed": "המועד שהעובד ביקש כבר עבר",
+    "desiredDateNear": "המועד המבוקש בעוד {days} ימים",
+    "meetingSoon": "הפגישה בעוד {hours} שעות",
+    "attemptsWithoutReply": "{count} ניסיונות קשר ללא מענה",
+    "keyAccount": "{count} בקשות מול אותה חברה",
+    "slaBreached": "חריגה מזמן הטיפול שהוגדר",
+    "slaAtRisk": "מתקרב לחריגה מזמן הטיפול",
+    "awaitingCoordinator": "עדיין לא נלקחה לטיפול",
+    "blockedOnEmployee": "ממתין למידע מהעובד {days} ימים",
+    "summaryOverdue": "הפגישה הסתיימה לפני {days} ימים ואין סיכום"
   },
 
   "activity": {
@@ -362,6 +405,44 @@
     "followUpCount": "פגישות המשך",
     "hours": "שעות",
     "days": "ימים"
+  },
+
+  "calendarSourceNote": "מוצגות כאן פגישות שנקבעו בתוך המערכת. לאחר חיבור חשבון גוגל או אאוטלוק יוצגו כאן גם החסימות מהיומן האישי.",
+
+  "profile": {
+    "title": "הפרטים שלי",
+    "subtitle": "כך המתאמים והעמיתים שלך יוצרים איתך קשר.",
+    "fullName": "שם מלא",
+    "jobTitle": "תפקיד",
+    "email": "דואר אלקטרוני",
+    "emailHint": "שם המשתמש שלך במערכת. לשינוי פנה למנהל המערכת.",
+    "phone": "טלפון",
+    "whatsapp": "וואטסאפ",
+    "whatsappHint": "מספר בפורמט בינלאומי, בלי סימנים. לדוגמה 972501234567",
+    "workStart": "תחילת יום עבודה",
+    "workEnd": "סוף יום עבודה",
+    "save": "שמור פרטים",
+    "saving": "שומר",
+    "saved": "הפרטים נשמרו",
+
+    "connectionsTitle": "חשבונות מחוברים",
+    "connectionsSubtitle": "חיבור דואר ויומן, כדי שהמערכת תדע מה קורה גם כשלא עובדים בתוכה.",
+    "connect": "חבר חשבון",
+    "disconnect": "נתק",
+    "reconnect": "חבר מחדש",
+    "statusCONNECTED": "מחובר",
+    "statusDISCONNECTED": "לא מחובר",
+    "statusNOT_CONFIGURED": "לא מוגדר בשרת",
+    "statusNEEDS_ATTENTION": "דורש טיפול",
+    "statusEXPIRED": "פג תוקף",
+    "lastSync": "סנכרון אחרון",
+    "neverSynced": "טרם סונכרן",
+    "whatItDoes": "מה זה מאפשר",
+    "notConfiguredTitle": "החיבור עדיין לא הופעל בשרת",
+    "notConfiguredBody": "כדי להפעיל אותו צריך ליצור פרטי גישה אצל הספק ולהזין אותם בקובץ משתני הסביבה. עד אז הכפתור מושבת בכוונה, ולא מוצג כאן שום חיבור מדומה.",
+    "missingVariables": "משתנים חסרים",
+    "redirectUri": "כתובת החזרה שצריך לרשום אצל הספק",
+    "openConsole": "פתח את מסך פרטי הגישה"
   },
 
   "contacts": {

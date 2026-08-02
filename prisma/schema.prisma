@@ -170,6 +170,23 @@ enum Locale {
   en
 }
 
+/// External accounts a user can connect for mail and calendar.
+enum ConnectionProvider {
+  GOOGLE
+  MICROSOFT
+}
+
+enum ConnectionStatus {
+  /// Credentials for this provider are not configured on the server.
+  NOT_CONFIGURED
+  /// Configured, but this user has not connected their account.
+  DISCONNECTED
+  CONNECTED
+  /// Connected, but the last refresh or sync failed.
+  NEEDS_ATTENTION
+  EXPIRED
+}
+
 // ---------------------------------------------------------------- tenancy
 
 model Organization {
@@ -196,6 +213,7 @@ model Organization {
   settings      Setting[]
   aiUsageLogs   AiUsageLog[]
   aiSuggestions AiSuggestion[]
+  connections   Connection[]
 
   @@map("organizations")
 }
@@ -217,20 +235,28 @@ model Department {
 }
 
 model User {
-  id             String    @id @default(cuid())
+  id             String @id @default(cuid())
   organizationId String
   email          String
   passwordHash   String
   fullName       String
-  phone          String?
-  role           Role      @default(EMPLOYEE)
-  departmentId   String?
-  managerId      String?
-  locale         Locale    @default(he)
-  isActive       Boolean   @default(true)
-  lastLoginAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+
+  /// How colleagues and coordinators reach this person.
+  phone     String?
+  whatsapp  String?
+  jobTitle  String?
+  /// Working hours, used later when proposing meeting times.
+  workStart String? @default("09:00")
+  workEnd   String? @default("18:00")
+
+  role         Role      @default(EMPLOYEE)
+  departmentId String?
+  managerId    String?
+  locale       Locale    @default(he)
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   department   Department?  @relation("DepartmentMembers", fields: [departmentId], references: [id], onDelete: SetNull)
@@ -253,6 +279,7 @@ model User {
   aiUsageLogs        AiUsageLog[]
   aiSuggestions      AiSuggestion[]       @relation("AiSuggestionAuthor")
   aiDecisions        AiSuggestion[]       @relation("AiSuggestionDecidedBy")
+  connections        Connection[]
 
   @@unique([organizationId, email])
   @@index([organizationId])
@@ -565,6 +592,50 @@ model AuditLog {
   @@index([organizationId, occurredAt])
   @@index([organizationId, entity, entityId])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------- integrations
+
+/// A user's link to Gmail / Google Calendar or to Outlook mail and calendar.
+///
+/// Tokens are stored encrypted and are never returned to the browser. A row
+/// exists only once a user starts connecting — before that the provider is
+/// reported as DISCONNECTED, or NOT_CONFIGURED when the server has no client
+/// credentials for it.
+model Connection {
+  id             String @id @default(cuid())
+  organizationId String
+  userId         String
+
+  provider ConnectionProvider
+  status   ConnectionStatus   @default(DISCONNECTED)
+
+  /// The mailbox this connection actually authenticated as.
+  accountEmail String?
+
+  /// Encrypted at rest. Never selected into anything the browser receives.
+  accessToken  String?
+  refreshToken String?
+  expiresAt    DateTime?
+
+  /// Exactly what the user granted, so the UI can say what it may do.
+  scopes String[] @default([])
+
+  lastSyncAt    DateTime?
+  lastSyncError String?
+  /// Cursor supplied by the provider, so a sync resumes instead of restarting.
+  syncCursor    String?
+
+  connectedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([organizationId])
+  @@map("connections")
 }
 
 // ---------------------------------------------------------------- ai layer
