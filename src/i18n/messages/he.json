@@ -37,7 +37,6 @@
     "hebrew": "עברית",
     "english": "אנגלית"
   },
-
   "nav": {
     "dashboard": "לוח מרכזי",
     "myDay": "היום שלי",
@@ -55,9 +54,14 @@
     "settings": "הגדרות",
     "sectionWork": "עבודה",
     "sectionInsight": "מידע",
-    "sectionAdmin": "ניהול"
+    "sectionAdmin": "ניהול",
+    "sectionRequests": "בקשות",
+    "profile": "הפרופיל שלי",
+    "account": "חשבון",
+    "search": "חיפוש בקשה, איש קשר או טלפון",
+    "openMenu": "פתיחת תפריט",
+    "closeMenu": "סגירת תפריט"
   },
-
   "auth": {
     "signInTitle": "כניסה למערכת",
     "signInSubtitle": "הזן את פרטי המשתמש שלך",
@@ -70,26 +74,22 @@
     "signedOut": "יצאת מהמערכת",
     "sessionExpired": "החיבור פג תוקף, יש להתחבר מחדש"
   },
-
   "roles": {
     "ADMIN": "מנהל מערכת",
     "MANAGER": "מנהל",
     "COORDINATOR": "מתאם",
     "EMPLOYEE": "עובד"
   },
-
   "meetingType": {
     "IN_PERSON": "פגישה",
     "PHONE": "שיחת טלפון",
     "VIDEO": "פגישת וידאו"
   },
-
   "priority": {
     "NORMAL": "רגילה",
     "HIGH": "גבוהה",
     "URGENT": "דחופה"
   },
-
   "status": {
     "NEW": "בקשה חדשה",
     "NEEDS_COORDINATION": "דורש תיאום",
@@ -104,13 +104,11 @@
     "CANCELLED": "בוטלה",
     "DECLINED": "הצד השני סירב"
   },
-
   "sla": {
     "GREEN": "תקין",
     "AMBER": "דורש תשומת לב",
     "RED": "באיחור"
   },
-
   "dashboard": {
     "title": "לוח מרכזי",
     "greeting": "שלום {name}",
@@ -128,7 +126,6 @@
     "attentionMissingSummary": "{count} פגישות הסתיימו ועדיין אין להן סיכום",
     "attentionStale": "{count} בקשות בטיפול ללא פעילות מעל {days} ימים"
   },
-
   "requests": {
     "title": "כל הבקשות",
     "myTitle": "הפגישות שלי",
@@ -172,7 +169,6 @@
     "nextActionNone": "אין פעולה נדרשת",
     "notScheduledYet": "טרם נקבע"
   },
-
   "newRequest": {
     "title": "בקשה חדשה",
     "subtitle": "מלא את הפרטים והבקשה תעבור מיד למתאם",
@@ -215,7 +211,6 @@
     "submitting": "שולח",
     "created": "הבקשה נפתחה ומספרה {number}"
   },
-
   "request": {
     "title": "בקשה {number}",
     "detailsTitle": "פרטי הפגישה",
@@ -249,7 +244,6 @@
     "scheduleLocation": "מיקום",
     "scheduleUrl": "קישור לפגישה",
     "scheduleReason": "סיבת השינוי",
-
     "actionsTitle": "מה עושים עכשיו",
     "actionsHint": "כל פעולה נרשמת בציר הזמן וביומן הביקורת.",
     "actionReply": "רשום תשובה שהתקבלה",
@@ -276,7 +270,6 @@
     "notRanked": "הבקשה סגורה ואינה מדורגת.",
     "backToList": "חזרה לרשימה"
   },
-
   "priorityFactor": {
     "requesterPriority": "העדיפות שהעובד הגדיר",
     "openFor": "הבקשה פתוחה {days} ימים",
@@ -292,7 +285,6 @@
     "blockedOnEmployee": "ממתין למידע מהעובד {days} ימים",
     "summaryOverdue": "הפגישה הסתיימה לפני {days} ימים ואין סיכום"
   },
-
   "activity": {
     "REQUEST_CREATED": "{actor} פתח בקשה",
     "ASSIGNED": "{actor} לקח את הבקשה לטיפול",
@@ -312,7 +304,6 @@
     "COMPLETED": "הפגישה הסתיימה",
     "SUMMARY_SUBMITTED": "{actor} מילא סיכום"
   },
-
   "channel": {
     "PHONE": "טלפון",
     "EMAIL": "דואר",
@@ -322,7 +313,6 @@
     "IN_SYSTEM": "במערכת",
     "OTHER": "אחר"
   },
-
   "outcome": {
     "NO_ANSWER": "אין מענה",
     "LEFT_MESSAGE": "הושארה הודעה",
@@ -331,7 +321,6 @@
     "POSITIVE": "תגובה חיובית",
     "NEGATIVE": "תגובה שלילית"
   },
-
   "summary": {
     "title": "סיכום פגישה",
     "subtitle": "הפגישה הסתיימה. נא למלא סיכום קצר",
@@ -348,7 +337,6 @@
     "submit": "שמור סיכום",
     "saved": "הסיכום נשמר"
   },
-
   "summaryOutcome": {
     "SUCCESS": "הצלחה",
     "FOLLOW_UP_NEEDED": "נדרש המשך טיפול",
@@ -357,7 +345,6 @@
     "ANOTHER_MEETING": "נדרשת פגישה נוספת",
     "OTHER": "אחר"
   },
-
   "myDay": {
     "title": "היום שלי",
     "meetingsToday": "פגישות היום",
@@ -368,7 +355,6 @@
     "followUps": "משימות המשך",
     "empty": "אין פריטים בקטגוריה הזו"
   },
-
   "notifications": {
     "title": "התראות",
     "markAllRead": "סמן הכול כנקרא",
@@ -384,7 +370,6 @@
     "SLA_BREACH": "בקשה חורגת מזמן הטיפול",
     "TASK_ASSIGNED": "הוקצתה לך משימת המשך"
   },
-
   "analytics": {
     "title": "ניתוח נתונים",
     "range7": "7 ימים",
@@ -407,9 +392,7 @@
     "hours": "שעות",
     "days": "ימים"
   },
-
   "calendarSourceNote": "מוצגות כאן פגישות שנקבעו בתוך המערכת. לאחר חיבור חשבון גוגל או אאוטלוק יוצגו כאן גם החסימות מהיומן האישי.",
-
   "profile": {
     "title": "הפרטים שלי",
     "subtitle": "כך המתאמים והעמיתים שלך יוצרים איתך קשר.",
@@ -425,7 +408,6 @@
     "save": "שמור פרטים",
     "saving": "שומר",
     "saved": "הפרטים נשמרו",
-
     "connectionsTitle": "חשבונות מחוברים",
     "connectionsSubtitle": "חיבור דואר ויומן, כדי שהמערכת תדע מה קורה גם כשלא עובדים בתוכה.",
     "connect": "חבר חשבון",
@@ -445,7 +427,6 @@
     "redirectUri": "כתובת החזרה שצריך לרשום אצל הספק",
     "openConsole": "פתח את מסך פרטי הגישה"
   },
-
   "contacts": {
     "title": "אנשי קשר",
     "new": "איש קשר חדש",
@@ -453,7 +434,6 @@
     "requestCount": "בקשות",
     "lastContact": "קשר אחרון"
   },
-
   "admin": {
     "usersTitle": "משתמשים",
     "newUser": "משתמש חדש",
@@ -483,7 +463,6 @@
     "orgTimezone": "אזור זמן",
     "orgLocale": "שפת ברירת מחדל"
   },
-
   "errors": {
     "generic": "משהו השתבש. נסה שוב",
     "notFound": "הפריט לא נמצא",
@@ -496,7 +475,6 @@
     "tooShort": "קצר מדי",
     "tooLong": "ארוך מדי"
   },
-
   "time": {
     "minutes": "{count} דקות",
     "hours": "{count} שעות",

@@ -37,7 +37,6 @@
     "hebrew": "Hebrew",
     "english": "English"
   },
-
   "nav": {
     "dashboard": "Dashboard",
     "myDay": "My day",
@@ -55,9 +54,14 @@
     "settings": "Settings",
     "sectionWork": "Work",
     "sectionInsight": "Insight",
-    "sectionAdmin": "Administration"
+    "sectionAdmin": "Administration",
+    "sectionRequests": "Requests",
+    "profile": "My profile",
+    "account": "Account",
+    "search": "Search requests, contacts, phone",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
   },
-
   "auth": {
     "signInTitle": "Sign in",
     "signInSubtitle": "Enter your account details",
@@ -70,26 +74,22 @@
     "signedOut": "You have been signed out",
     "sessionExpired": "Your session expired, please sign in again"
   },
-
   "roles": {
     "ADMIN": "Administrator",
     "MANAGER": "Manager",
     "COORDINATOR": "Coordinator",
     "EMPLOYEE": "Employee"
   },
-
   "meetingType": {
     "IN_PERSON": "Meeting",
     "PHONE": "Phone call",
     "VIDEO": "Video meeting"
   },
-
   "priority": {
     "NORMAL": "Normal",
     "HIGH": "High",
     "URGENT": "Urgent"
   },
-
   "status": {
     "NEW": "New",
     "NEEDS_COORDINATION": "Needs coordination",
@@ -104,13 +104,11 @@
     "CANCELLED": "Cancelled",
     "DECLINED": "Declined"
   },
-
   "sla": {
     "GREEN": "On track",
     "AMBER": "Needs attention",
     "RED": "Overdue"
   },
-
   "dashboard": {
     "title": "Dashboard",
     "greeting": "Hello {name}",
@@ -128,7 +126,6 @@
     "attentionMissingSummary": "{count} meetings ended and still have no summary",
     "attentionStale": "{count} in-progress requests with no activity for over {days} days"
   },
-
   "requests": {
     "title": "All requests",
     "myTitle": "My meetings",
@@ -172,7 +169,6 @@
     "nextActionNone": "Nothing to do",
     "notScheduledYet": "Not booked yet"
   },
-
   "newRequest": {
     "title": "New request",
     "subtitle": "Fill in the details and the request goes straight to a coordinator",
@@ -215,7 +211,6 @@
     "submitting": "Submitting",
     "created": "Request {number} was opened"
   },
-
   "request": {
     "title": "Request {number}",
     "detailsTitle": "Meeting details",
@@ -249,7 +244,6 @@
     "scheduleLocation": "Location",
     "scheduleUrl": "Meeting link",
     "scheduleReason": "Reason for the change",
-
     "actionsTitle": "What happens next",
     "actionsHint": "Every action is written to the timeline and the audit log.",
     "actionReply": "Record a reply",
@@ -276,7 +270,6 @@
     "notRanked": "The request is closed and is not ranked.",
     "backToList": "Back to the list"
   },
-
   "priorityFactor": {
     "requesterPriority": "The priority the employee set",
     "openFor": "Open for {days} days",
@@ -292,7 +285,6 @@
     "blockedOnEmployee": "Waiting on the employee for {days} days",
     "summaryOverdue": "The meeting ended {days} days ago with no summary"
   },
-
   "activity": {
     "REQUEST_CREATED": "{actor} opened the request",
     "ASSIGNED": "{actor} took the request",
@@ -312,7 +304,6 @@
     "COMPLETED": "The meeting ended",
     "SUMMARY_SUBMITTED": "{actor} submitted the summary"
   },
-
   "channel": {
     "PHONE": "Phone",
     "EMAIL": "Email",
@@ -322,7 +313,6 @@
     "IN_SYSTEM": "In system",
     "OTHER": "Other"
   },
-
   "outcome": {
     "NO_ANSWER": "No answer",
     "LEFT_MESSAGE": "Left a message",
@@ -331,7 +321,6 @@
     "POSITIVE": "Positive reply",
     "NEGATIVE": "Negative reply"
   },
-
   "summary": {
     "title": "Meeting summary",
     "subtitle": "The meeting has ended. Please write a short summary",
@@ -348,7 +337,6 @@
     "submit": "Save summary",
     "saved": "Summary saved"
   },
-
   "summaryOutcome": {
     "SUCCESS": "Success",
     "FOLLOW_UP_NEEDED": "Follow-up needed",
@@ -357,7 +345,6 @@
     "ANOTHER_MEETING": "Another meeting needed",
     "OTHER": "Other"
   },
-
   "myDay": {
     "title": "My day",
     "meetingsToday": "Meetings today",
@@ -368,7 +355,6 @@
     "followUps": "Follow-up tasks",
     "empty": "Nothing in this list"
   },
-
   "notifications": {
     "title": "Notifications",
     "markAllRead": "Mark all as read",
@@ -384,7 +370,6 @@
     "SLA_BREACH": "A request is past its handling time",
     "TASK_ASSIGNED": "A follow-up task was assigned to you"
   },
-
   "analytics": {
     "title": "Analytics",
     "range7": "7 days",
@@ -407,9 +392,7 @@
     "hours": "hours",
     "days": "days"
   },
-
   "calendarSourceNote": "These are meetings booked inside MeetingFlow. Once a Google or Outlook account is connected, that calendar's busy blocks appear here too.",
-
   "profile": {
     "title": "My details",
     "subtitle": "How coordinators and colleagues reach you.",
@@ -425,7 +408,6 @@
     "save": "Save details",
     "saving": "Saving",
     "saved": "Details saved",
-
     "connectionsTitle": "Connected accounts",
     "connectionsSubtitle": "Mail and calendar, so the system knows what happened even when you worked outside it.",
     "connect": "Connect account",
@@ -445,7 +427,6 @@
     "redirectUri": "Redirect URI to register with the provider",
     "openConsole": "Open the credentials console"
   },
-
   "contacts": {
     "title": "Contacts",
     "new": "New contact",
@@ -453,7 +434,6 @@
     "requestCount": "Requests",
     "lastContact": "Last contact"
   },
-
   "admin": {
     "usersTitle": "Users",
     "newUser": "New user",
@@ -483,7 +463,6 @@
     "orgTimezone": "Time zone",
     "orgLocale": "Default language"
   },
-
   "errors": {
     "generic": "Something went wrong. Please try again",
     "notFound": "Not found",
@@ -496,7 +475,6 @@
     "tooShort": "Too short",
     "tooLong": "Too long"
   },
-
   "time": {
     "minutes": "{count} minutes",
     "hours": "{count} hours",

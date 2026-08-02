@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { ChevronLeft } from "lucide-react";
+
+import { formatDay } from "@/lib/dates";
 
 import { KpiRing, type KpiTone } from "@/components/dashboard/kpi-ring";
 import { Badge, Eyebrow, GlassCard, cn } from "@/components/ui/primitives";
@@ -13,13 +15,6 @@ import { OPEN_STATUSES } from "@/lib/workflow";
 
 export const dynamic = "force-dynamic";
 
-const SEVERITY_TONE: Record<string, KpiTone> = {
-  critical: "critical",
-  warning: "warning",
-  info: "info",
-  success: "ok",
-};
-
 const SEVERITY_DOT: Record<string, string> = {
   critical: "bg-[#e05a4c]",
   warning: "bg-[#e0a83c]",
@@ -30,6 +25,7 @@ const SEVERITY_DOT: Record<string, string> = {
 export default async function DashboardPage() {
   const ctx = await requireUser();
   const t = await getTranslations();
+  const locale = await getLocale();
 
   const { counters, attention } = await dashboardSnapshot(ctx.db, ctx.session);
   const visible = await requestVisibility(ctx.db, ctx.session);
@@ -131,27 +127,10 @@ export default async function DashboardPage() {
           </h1>
         </div>
 
-        {/* The three places a person goes next, one click from the front door. */}
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/my-day"
-            className="rounded-[999px] bg-[rgba(186,214,247,0.06)] px-5 py-2.5 text-[13.5px] text-frost-glow shadow-[inset_0_0_0_1px_rgba(186,215,247,0.12)] hover:bg-[rgba(186,214,247,0.12)]"
-          >
-            {t("nav.myDay")}
-          </Link>
-          <Link
-            href="/requests"
-            className="rounded-[999px] bg-[rgba(186,214,247,0.06)] px-5 py-2.5 text-[13.5px] text-frost-glow shadow-[inset_0_0_0_1px_rgba(186,215,247,0.12)] hover:bg-[rgba(186,214,247,0.12)]"
-          >
-            {t("nav.allRequests")}
-          </Link>
-          <Link
-            href="/requests/new"
-            className="rounded-[999px] bg-void-violet px-5 py-2.5 text-[13.5px] font-medium text-pure-white hover:opacity-90"
-          >
-            {t("nav.newRequest")}
-          </Link>
-        </div>
+        {/* The shortcuts that used to sit here are in the top bar now, on every
+            screen. What belongs here instead is what the top bar cannot say:
+            which day you are looking at. */}
+        <p className="text-[14px] text-fog-veil">{formatDay(new Date(), locale)}</p>
       </header>
 
       <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">

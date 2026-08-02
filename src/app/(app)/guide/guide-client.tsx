@@ -258,7 +258,8 @@ export function GuideClient() {
 
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
         {/* ------------------------------------------------ table of contents */}
-        <aside className="lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-y-auto">
+        {/* Offset clears the fixed top bar (64px) plus the page gutter. */}
+        <aside className="lg:sticky lg:top-[88px] lg:h-[calc(100vh-112px)] lg:overflow-y-auto">
           <GlassCard className="flex flex-col gap-4 p-4">
             <div className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between">
@@ -333,7 +334,7 @@ export function GuideClient() {
                 <GlassCard
                   key={section.id}
                   id={section.id}
-                  className="flex scroll-mt-6 flex-col gap-4"
+                  className="flex scroll-mt-[88px] flex-col gap-4"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
