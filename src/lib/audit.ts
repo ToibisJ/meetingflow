@@ -1,3 +1,5 @@
+import type { TenantDb } from "./tenant";
+
 /**
  * Audit logging.
  *
@@ -15,6 +17,11 @@ export type AuditActor = {
 };
 
 export type AuditInput = {
+  /**
+   * The tenant client injects this at runtime as well; passing it here keeps
+   * the write type-checked and the injected value always wins.
+   */
+  organizationId: string;
   actor: AuditActor;
   entity: string;
   entityId: string;
@@ -27,13 +34,8 @@ export type AuditInput = {
 
 const ALWAYS_IGNORED = ["updatedAt", "createdAt", "lastActivityAt", "passwordHash"];
 
-/** Minimal shape we need; satisfied by both the plain and the tenant-scoped client. */
-type AuditWriter = {
-  auditLog: {
-    createMany: (args: { data: Record<string, unknown>[] }) => Promise<unknown>;
-    create: (args: { data: Record<string, unknown> }) => Promise<unknown>;
-  };
-};
+/** Just the delegate we need — works with the tenant client and with a transaction. */
+type AuditWriter = Pick<TenantDb, "auditLog">;
 
 function serialize(value: unknown): string | null {
   if (value === null || value === undefined) return null;
@@ -77,9 +79,11 @@ export async function writeAudit(
   client: AuditWriter,
   input: AuditInput,
 ): Promise<void> {
-  const { actor, entity, entityId, action, before, after, ignore } = input;
+  const { organizationId, actor, entity, entityId, action, before, after, ignore } =
+    input;
 
   const base = {
+    organizationId,
     userId: actor.userId,
     userName: actor.userName,
     entity,
