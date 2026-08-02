@@ -18,7 +18,7 @@ const [login, password, fullName, roleArg, slugArg] = process.argv.slice(2);
 
 if (!login || !password || !fullName) {
   console.error(
-    "Usage: npx tsx scripts/create-user.ts <login> <password> <full name> [ADMIN|MANAGER|COORDINATOR|EMPLOYEE] [org-slug]",
+    "Usage: npx tsx scripts/create-user.ts <login> <password> <full name> [DEVELOPER|ADMIN|MANAGER|COORDINATOR|EMPLOYEE] [org-slug]",
   );
   process.exit(1);
 }

@@ -60,7 +60,9 @@
     "account": "חשבון",
     "search": "חיפוש בקשה, איש קשר או טלפון",
     "openMenu": "פתיחת תפריט",
-    "closeMenu": "סגירת תפריט"
+    "closeMenu": "סגירת תפריט",
+    "roles": "תצוגת תפקידים",
+    "log": "לוג פגישות"
   },
   "auth": {
     "signInTitle": "כניסה למערכת",
@@ -75,6 +77,7 @@
     "sessionExpired": "החיבור פג תוקף, יש להתחבר מחדש"
   },
   "roles": {
+    "DEVELOPER": "מפתח",
     "ADMIN": "מנהל מערכת",
     "MANAGER": "מנהל",
     "COORDINATOR": "מתאם",
@@ -268,7 +271,17 @@
     "priorityScore": "ציון עדיפות",
     "whyUrgent": "למה זה דחוף",
     "notRanked": "הבקשה סגורה ואינה מדורגת.",
-    "backToList": "חזרה לרשימה"
+    "backToList": "חזרה לרשימה",
+    "actionCorrect": "תיקון פרטי הפגישה",
+    "correctHint": "למילוי רק מה שצריך לתקן. שדה שנשאר ריק נשאר כמו שהוא. כל שינוי נרשם בציר הזמן עם הערך הקודם, הערך החדש וסיבת התיקון.",
+    "correctReason": "סיבת התיקון",
+    "correctDate": "תאריך מתוקן",
+    "correctTime": "שעה מתוקנת",
+    "fieldSubject": "נושא מתוקן",
+    "fieldPurpose": "מטרה מתוקנת",
+    "fieldLocation": "מקום מתוקן",
+    "fieldMeetingUrl": "קישור מתוקן",
+    "correctedTitle": "תיקון"
   },
   "priorityFactor": {
     "requesterPriority": "העדיפות שהעובד הגדיר",
@@ -302,7 +315,8 @@
     "NOTE": "{actor} הוסיף הערה",
     "STATUS_CHANGED": "{actor} שינה סטטוס",
     "COMPLETED": "הפגישה הסתיימה",
-    "SUMMARY_SUBMITTED": "{actor} מילא סיכום"
+    "SUMMARY_SUBMITTED": "{actor} מילא סיכום",
+    "CORRECTED": "תיקון פרטים"
   },
   "channel": {
     "PHONE": "טלפון",

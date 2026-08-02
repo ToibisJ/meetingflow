@@ -60,7 +60,9 @@
     "account": "Account",
     "search": "Search requests, contacts, phone",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "roles": "Role preview",
+    "log": "Meeting log"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -75,6 +77,7 @@
     "sessionExpired": "Your session expired, please sign in again"
   },
   "roles": {
+    "DEVELOPER": "Developer",
     "ADMIN": "Administrator",
     "MANAGER": "Manager",
     "COORDINATOR": "Coordinator",
@@ -268,7 +271,17 @@
     "priorityScore": "Priority score",
     "whyUrgent": "Why this is urgent",
     "notRanked": "The request is closed and is not ranked.",
-    "backToList": "Back to the list"
+    "backToList": "Back to the list",
+    "actionCorrect": "Correct the record",
+    "correctHint": "Fill in only what needs putting right. A box left empty stays as it is. Every change is written to the timeline with the old value, the new value and the reason.",
+    "correctReason": "Reason for the correction",
+    "correctDate": "Corrected date",
+    "correctTime": "Corrected time",
+    "fieldSubject": "Corrected subject",
+    "fieldPurpose": "Corrected purpose",
+    "fieldLocation": "Corrected location",
+    "fieldMeetingUrl": "Corrected link",
+    "correctedTitle": "Correction"
   },
   "priorityFactor": {
     "requesterPriority": "The priority the employee set",
@@ -302,7 +315,8 @@
     "NOTE": "{actor} added a note",
     "STATUS_CHANGED": "{actor} changed the status",
     "COMPLETED": "The meeting ended",
-    "SUMMARY_SUBMITTED": "{actor} submitted the summary"
+    "SUMMARY_SUBMITTED": "{actor} submitted the summary",
+    "CORRECTED": "Details corrected"
   },
   "channel": {
     "PHONE": "Phone",

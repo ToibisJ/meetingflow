@@ -129,7 +129,9 @@ body {
   min-height: 100vh;
 }
 
-/* Ambient blueprint grid + spotlight halo, behind every page */
+/* Ambient blueprint grid behind every page.
+   The spotlight beam that used to sit on top of it was removed: on a working
+   screen it read as a bright stripe down the middle of the content. */
 .mf-atmosphere::before {
   content: "";
   position: fixed;
@@ -144,23 +146,6 @@ body {
     linear-gradient(to bottom, rgba(186, 215, 247, 0.06) 1px, transparent 1px);
   background-size: 80px 80px;
   mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 40%, transparent 100%);
-}
-
-.mf-atmosphere::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: conic-gradient(
-    at 50% -5%,
-    transparent 45%,
-    rgba(124, 145, 182, 0.3) 49%,
-    rgba(124, 145, 182, 0.5) 50%,
-    rgba(124, 145, 182, 0.3) 51%,
-    transparent 55%
-  );
-  opacity: 0.5;
 }
 
 /* Skywash gradient fill — display wordmark and largest headings only */

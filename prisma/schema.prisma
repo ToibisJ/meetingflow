@@ -12,7 +12,10 @@ datasource db {
 
 // ---------------------------------------------------------------- enums
 
+/// Ordered widest to narrowest. DEVELOPER sits above ADMIN and is the only level
+/// allowed to look at the product through another person's eyes.
 enum Role {
+  DEVELOPER
   ADMIN
   MANAGER
   COORDINATOR
@@ -74,6 +77,8 @@ enum ActivityType {
   INFO_REQUESTED
   INFO_PROVIDED
   NOTE
+  /// Details of an existing meeting were put right after the fact.
+  CORRECTED
   STATUS_CHANGED
   COMPLETED
   SUMMARY_SUBMITTED

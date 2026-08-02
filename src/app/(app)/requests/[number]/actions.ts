@@ -13,6 +13,7 @@ import {
   addNote,
   assignRequest,
   cancelRequest,
+  correctRequest,
   logContactAttempt,
   markDeclined,
   provideInfo,
@@ -39,6 +40,7 @@ const MESSAGES: Record<string, string> = {
   not_found: "הבקשה לא נמצאה.",
   invalid_transition: "לא ניתן לבצע את הפעולה הזו מהמצב הנוכחי של הבקשה.",
   invalid_input: "יש שדות חסרים או לא תקינים.",
+  read_only: "אתה צופה במערכת דרך משתמש אחר, ולכן אי אפשר לשנות כלום. חזור לעצמך כדי לבצע פעולות.",
 };
 
 function toState(result: ActionResult, requestId: string): FormState {
@@ -242,6 +244,43 @@ export async function summaryAction(
       outcome: text(form, "outcome") as SummaryOutcome,
       needsFollowupMeeting: text(form, "needsFollowup") === "yes",
       tasks,
+    }),
+    id,
+  );
+}
+
+/**
+ * Putting a wrongly recorded detail right.
+ *
+ * Only the fields the person actually filled in are sent on; an empty box means
+ * "leave this alone", not "clear it". The domain layer works out what really
+ * changed and writes the correction to the timeline.
+ */
+export async function correctAction(
+  _prev: FormState,
+  form: FormData,
+): Promise<FormState> {
+  const ctx = await requireUser();
+  const id = text(form, "requestId");
+
+  const optional = (key: string) => {
+    const value = text(form, key);
+    return value.length > 0 ? value : undefined;
+  };
+
+  const date = text(form, "correctDate");
+  const time = text(form, "correctTime");
+
+  return toState(
+    await correctRequest(ctx, id, {
+      reason: text(form, "reason"),
+      subject: optional("subject"),
+      purpose: optional("purpose"),
+      description: optional("description"),
+      desiredOutcome: optional("desiredOutcome"),
+      scheduledAt: date ? toDate(date, time) : undefined,
+      location: optional("location"),
+      meetingUrl: optional("meetingUrl"),
     }),
     id,
   );

@@ -51,6 +51,35 @@ const WHERE_OPERATIONS = new Set([
 
 const CREATE_OPERATIONS = new Set(["create", "createMany", "createManyAndReturn", "upsert"]);
 
+/**
+ * Anything that changes a row. While one person is previewing the product as
+ * another, the client is built read-only and these are refused here rather than
+ * in each screen — a screen can forget, this cannot.
+ */
+const WRITE_OPERATIONS = new Set([
+  "create",
+  "createMany",
+  "createManyAndReturn",
+  "update",
+  "updateMany",
+  "updateManyAndReturn",
+  "upsert",
+  "delete",
+  "deleteMany",
+  "executeRaw",
+  "queryRaw",
+  "$executeRaw",
+  "$queryRaw",
+]);
+
+/** Thrown when a preview session tries to change something. */
+export class ReadOnlyError extends Error {
+  constructor(model: string, operation: string) {
+    super(`Read-only session: ${operation} on ${model} was refused`);
+    this.name = "ReadOnlyError";
+  }
+}
+
 type AnyArgs = Record<string, unknown>;
 
 function withOrgId(data: unknown, organizationId: string): unknown {
@@ -60,16 +89,22 @@ function withOrgId(data: unknown, organizationId: string): unknown {
   return { ...(data as AnyArgs), organizationId };
 }
 
-export function tenantDb(organizationId: string) {
+export function tenantDb(organizationId: string, options: { readOnly?: boolean } = {}) {
   if (!organizationId) {
     throw new Error("tenantDb called without an organizationId");
   }
+
+  const readOnly = options.readOnly === true;
 
   return db.$extends({
     name: "tenant-guard",
     query: {
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
+          if (readOnly && WRITE_OPERATIONS.has(operation)) {
+            throw new ReadOnlyError(model, operation);
+          }
+
           if (UNSCOPED_MODELS.has(model)) {
             return query(args);
           }

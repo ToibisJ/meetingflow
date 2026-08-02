@@ -8,7 +8,7 @@ import type {
   RequestStatus,
   SummaryOutcome,
 } from "@/generated/prisma/enums";
-import type { TenantDb } from "@/lib/tenant";
+import { ReadOnlyError, type TenantDb } from "@/lib/tenant";
 import type { SessionUser } from "@/lib/session";
 import { ForbiddenError, can, type Permission } from "@/lib/rbac";
 import { writeAudit } from "@/lib/audit";
@@ -41,14 +41,18 @@ export class NotFoundError extends Error {
   }
 }
 
+type ActionError =
+  | "forbidden"
+  | "not_found"
+  | "invalid_transition"
+  | "invalid_input"
+  | "read_only";
+
 export type ActionResult =
   | { ok: true; status: RequestStatus }
-  | { ok: false; error: "forbidden" | "not_found" | "invalid_transition" | "invalid_input"; message: string };
+  | { ok: false; error: ActionError; message: string };
 
-function fail(
-  error: "forbidden" | "not_found" | "invalid_transition" | "invalid_input",
-  message: string,
-): ActionResult {
+function fail(error: ActionError, message: string): ActionResult {
   return { ok: false, error, message };
 }
 
@@ -62,6 +66,10 @@ async function guard(work: () => Promise<ActionResult>): Promise<ActionResult> {
       return fail("invalid_transition", error.message);
     }
     if (error instanceof NotFoundError) return fail("not_found", error.message);
+    // Someone previewing the product as another person tried to change
+    // something. The client already refused it; this turns the refusal into a
+    // sentence the screen can show.
+    if (error instanceof ReadOnlyError) return fail("read_only", error.message);
     throw error;
   }
 }
@@ -140,41 +148,48 @@ async function apply(
 
   const nextStatus = input.to ?? request.status;
 
-  await ctx.db.meetingRequest.update({
-    where: { id: request.id },
-    data: {
-      ...(input.data ?? {}),
-      ...(input.to ? { status: input.to } : {}),
-      lastActivityAt: now,
-      ...(input.to && ["COMPLETED", "CANCELLED", "DECLINED"].includes(input.to)
-        ? { closedAt: now }
-        : {}),
-    },
-  });
+  // One transaction on purpose. A change that lands without its timeline entry
+  // is worse than a change that does not land at all: the record would then say
+  // something happened that nobody can account for.
+  await ctx.db.$transaction(async (tx) => {
+    await tx.meetingRequest.update({
+      where: { id: request.id },
+      data: {
+        ...(input.data ?? {}),
+        ...(input.to ? { status: input.to } : {}),
+        lastActivityAt: now,
+        ...(input.to && ["COMPLETED", "CANCELLED", "DECLINED"].includes(input.to)
+          ? { closedAt: now }
+          : {}),
+      },
+    });
 
-  await ctx.db.activity.create({
-    data: {
+    await tx.activity.create({
+      data: {
+        organizationId: ctx.session.organizationId,
+        requestId: request.id,
+        actorUserId: ctx.session.id,
+        type: input.activity.type,
+        channel: input.activity.channel ?? null,
+        outcome: input.activity.outcome ?? null,
+        body: input.activity.body ?? null,
+        occurredAt: now,
+      },
+    });
+
+    await writeAudit(tx, {
       organizationId: ctx.session.organizationId,
-      requestId: request.id,
-      actorUserId: ctx.session.id,
-      type: input.activity.type,
-      channel: input.activity.channel ?? null,
-      outcome: input.activity.outcome ?? null,
-      body: input.activity.body ?? null,
-      occurredAt: now,
-    },
+      actor: { userId: ctx.session.id, userName: ctx.session.fullName },
+      entity: "MeetingRequest",
+      entityId: request.id,
+      action: input.audit.action,
+      before: { ...(input.audit.before ?? {}), status: request.status },
+      after: { ...(input.audit.after ?? {}), status: nextStatus },
+    });
   });
 
-  await writeAudit(ctx.db, {
-    organizationId: ctx.session.organizationId,
-    actor: { userId: ctx.session.id, userName: ctx.session.fullName },
-    entity: "MeetingRequest",
-    entityId: request.id,
-    action: input.audit.action,
-    before: { ...(input.audit.before ?? {}), status: request.status },
-    after: { ...(input.audit.after ?? {}), status: nextStatus },
-  });
-
+  // Notifications are deliberately outside it: a delivery that fails should not
+  // roll back work that was correctly recorded.
   if (input.notify) {
     const recipients = [...new Set(input.notify.userIds)].filter(
       (id) => id && id !== ctx.session.id,
@@ -813,6 +828,166 @@ export function cancelRequest(
         body: reason.slice(0, 140),
       },
     });
+
+    return { ok: true, status };
+  });
+}
+
+// ---------------------------------------------------------------- correction
+
+export type CorrectionInput = {
+  /** Why the record was wrong. Required — a correction without one is unreadable later. */
+  reason: string;
+  subject?: string | null;
+  purpose?: string | null;
+  description?: string | null;
+  desiredOutcome?: string | null;
+  /** Puts a wrongly recorded meeting time right. */
+  scheduledAt?: Date | null;
+  location?: string | null;
+  meetingUrl?: string | null;
+};
+
+const CORRECTABLE_LABELS: Record<string, string> = {
+  subject: "נושא",
+  purpose: "מטרה",
+  description: "תיאור",
+  desiredOutcome: "תוצאה רצויה",
+  scheduledAt: "מועד",
+  location: "מקום",
+  meetingUrl: "קישור",
+};
+
+/**
+ * Puts right something that was recorded wrong.
+ *
+ * A correction is not an edit that quietly replaces history. The status does not
+ * move, the old values stay in the audit row, and the timeline gets a CORRECTED
+ * entry naming every field that changed, its old value, its new value and the
+ * reason given. That entry is what the meeting log shows.
+ */
+export function correctRequest(
+  ctx: ActionContext,
+  requestId: string,
+  input: CorrectionInput,
+): Promise<ActionResult> {
+  return guard(async () => {
+    require(ctx, "request:correct");
+    const request = await load(ctx, requestId);
+    assertCanActOn(ctx, request);
+
+    const reason = input.reason.trim();
+    if (!reason) {
+      return fail("invalid_input", "A correction needs a reason");
+    }
+
+    const current = await ctx.db.meetingRequest.findUnique({
+      where: { id: request.id },
+      select: {
+        subject: true,
+        purpose: true,
+        description: true,
+        desiredOutcome: true,
+        scheduledAt: true,
+      },
+    });
+
+    if (!current) throw new NotFoundError();
+
+    const meeting = await ctx.db.meeting.findFirst({
+      where: { requestId: request.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        scheduledStart: true,
+        scheduledEnd: true,
+        location: true,
+        meetingUrl: true,
+      },
+    });
+
+    // Only fields the form actually sent, and only where the value really moved.
+    const before: Record<string, unknown> = {};
+    const after: Record<string, unknown> = {};
+    const data: Record<string, unknown> = {};
+    const meetingData: Record<string, unknown> = {};
+    const lines: string[] = [];
+
+    const note = (field: string, was: unknown, now: unknown) => {
+      before[field] = was;
+      after[field] = now;
+      lines.push(
+        `${CORRECTABLE_LABELS[field] ?? field}: ${was instanceof Date ? was.toLocaleString("he-IL") : (was ?? "—")} ← ${
+          now instanceof Date ? now.toLocaleString("he-IL") : (now ?? "—")
+        }`,
+      );
+    };
+
+    for (const field of ["subject", "purpose", "description", "desiredOutcome"] as const) {
+      const next = input[field];
+      if (next === undefined) continue;
+      const value = next === null ? null : String(next).trim();
+      if ((current[field] ?? null) === (value ?? null)) continue;
+      if (field === "subject" && !value) continue;
+      data[field] = value;
+      note(field, current[field], value);
+    }
+
+    if (input.scheduledAt !== undefined && input.scheduledAt !== null) {
+      if (Number.isNaN(input.scheduledAt.getTime())) {
+        return fail("invalid_input", "Invalid date");
+      }
+      if (current.scheduledAt?.getTime() !== input.scheduledAt.getTime()) {
+        data.scheduledAt = input.scheduledAt;
+        note("scheduledAt", current.scheduledAt, input.scheduledAt);
+
+        if (meeting) {
+          // Keep the meeting row's length; only slide it to the corrected time.
+          const length =
+            meeting.scheduledEnd.getTime() - meeting.scheduledStart.getTime();
+          meetingData.scheduledStart = input.scheduledAt;
+          meetingData.scheduledEnd = new Date(input.scheduledAt.getTime() + length);
+        }
+      }
+    }
+
+    for (const field of ["location", "meetingUrl"] as const) {
+      const next = input[field];
+      if (next === undefined || !meeting) continue;
+      const value = next === null ? null : String(next).trim() || null;
+      if ((meeting[field] ?? null) === value) continue;
+      meetingData[field] = value;
+      note(field, meeting[field], value);
+    }
+
+    if (lines.length === 0) {
+      return fail("invalid_input", "Nothing was changed");
+    }
+
+    const status = await apply(ctx, request, {
+      data,
+      activity: {
+        type: "CORRECTED",
+        body: `${lines.join("\n")}\n\nסיבת התיקון: ${reason}`,
+      },
+      audit: {
+        action: "correct",
+        before: { ...before, reason: null },
+        after: { ...after, reason },
+      },
+      notify: {
+        userIds: [request.requesterUserId, request.assignedCoordinatorId ?? ""],
+        type: "MEETING_RESCHEDULED",
+        title: `פרטי בקשה ${request.requestNumber} תוקנו`,
+        body: lines.join(" · ").slice(0, 140),
+      },
+    });
+
+    // Last on purpose. If anything above refuses — a permission, a read-only
+    // preview — the meeting row is still the one the timeline describes.
+    if (meeting && Object.keys(meetingData).length > 0) {
+      await ctx.db.meeting.update({ where: { id: meeting.id }, data: meetingData });
+    }
 
     return { ok: true, status };
   });

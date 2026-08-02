@@ -7,6 +7,7 @@ import {
   Bell,
   BookOpen,
   ChevronDown,
+  Eye,
   LogOut,
   Menu,
   PlusCircle,
@@ -50,6 +51,7 @@ export type TopNavProps = {
     notifications: string;
     guide: string;
     profile: string;
+    roles: string;
     signOut: string;
     search: string;
     openMenu: string;
@@ -308,6 +310,16 @@ export function TopNav({ items, unread, canCreate, user, labels }: TopNavProps) 
               >
                 <BookOpen size={15} className="opacity-70" />
                 {labels.guide}
+              </Link>
+              {/* Open to everyone: a level that may not preview still gets to
+                  read what each role sees, and to be told plainly why not. */}
+              <Link
+                role="menuitem"
+                href="/roles"
+                className="flex items-center gap-2 rounded-[6px] px-3 py-2 text-[14px] text-moon-mist transition-colors hover:bg-[rgba(186,214,247,0.06)] hover:text-frost-glow"
+              >
+                <Eye size={15} className="opacity-70" />
+                {labels.roles}
               </Link>
               <form action={signOutAction}>
                 <button

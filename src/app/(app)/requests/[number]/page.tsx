@@ -203,6 +203,12 @@ export default async function RequestWorkspace({
 
   if (isMine || coordinates) available.push("note");
 
+  // A correction has nothing to do with the state machine — a record can be
+  // wrong at any stage, including long after the meeting is over.
+  if (can(ctx.session.role, "request:correct") && (isMine || coordinates)) {
+    available.push("correct");
+  }
+
   if (legal.some((rule) => rule.to === "CANCELLED") && (isMine || coordinates)) {
     available.push("cancel");
   }

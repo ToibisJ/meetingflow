@@ -15,6 +15,7 @@ import { IDLE, type FormState } from "./form-state";
 import {
   assignAction,
   cancelAction,
+  correctAction,
   declineAction,
   logAttemptAction,
   noteAction,
@@ -49,7 +50,8 @@ export type ActionKey =
   | "requestReschedule"
   | "decline"
   | "cancel"
-  | "summary";
+  | "summary"
+  | "correct";
 
 export type Coordinator = { id: string; fullName: string };
 export type Colleague = { id: string; fullName: string };
@@ -353,6 +355,53 @@ export function ActionPanel({
         <Action {...shared} id="note" label={t("actionNote")} action={noteAction}>
           <Field label={t("noteText")}>
             <textarea name="note" className={areaClass} required />
+          </Field>
+        </Action>
+      ) : null}
+
+      {/* A correction, not an edit: an empty box leaves that detail alone, and
+          every field that does change is written to the timeline with its old
+          value, its new value and the reason. */}
+      {has("correct") ? (
+        <Action
+          {...shared}
+          id="correct"
+          label={t("actionCorrect")}
+          action={correctAction}
+          submitLabel={t("actionCorrect")}
+        >
+          <p className="text-[13px] leading-relaxed text-fog-veil">
+            {t("correctHint")}
+          </p>
+
+          <Field label={t("correctReason")}>
+            <textarea name="reason" className={areaClass} required />
+          </Field>
+
+          <Field label={t("fieldSubject")}>
+            <TextInput name="subject" />
+          </Field>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={t("correctDate")}>
+              <TextInput type="date" name="correctDate" />
+            </Field>
+            <Field label={t("correctTime")}>
+              <TextInput type="time" name="correctTime" defaultValue="09:00" />
+            </Field>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label={t("fieldLocation")}>
+              <TextInput name="location" />
+            </Field>
+            <Field label={t("fieldMeetingUrl")}>
+              <TextInput name="meetingUrl" dir="ltr" />
+            </Field>
+          </div>
+
+          <Field label={t("fieldPurpose")}>
+            <textarea name="purpose" className={areaClass} />
           </Field>
         </Action>
       ) : null}

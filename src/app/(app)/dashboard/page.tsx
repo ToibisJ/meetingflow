@@ -4,7 +4,6 @@ import { ChevronLeft } from "lucide-react";
 
 import { formatDay } from "@/lib/dates";
 
-import { KpiRing, type KpiTone } from "@/components/dashboard/kpi-ring";
 import { Badge, Eyebrow, GlassCard, cn } from "@/components/ui/primitives";
 import { requireUser } from "@/lib/current-user";
 import { visibilityScope } from "@/lib/rbac";
@@ -27,7 +26,8 @@ export default async function DashboardPage() {
   const t = await getTranslations();
   const locale = await getLocale();
 
-  const { counters, attention } = await dashboardSnapshot(ctx.db, ctx.session);
+  // The counters themselves are drawn by the shell; this page needs the buckets.
+  const { attention } = await dashboardSnapshot(ctx.db, ctx.session);
   const visible = await requestVisibility(ctx.db, ctx.session);
 
   const open = await ctx.db.meetingRequest.findMany({
@@ -71,52 +71,6 @@ export default async function DashboardPage() {
     .sort((a, b) => b.score.score - a.score.score)
     .slice(0, 8);
 
-  const totalForRings =
-    counters.needsCoordination +
-    counters.inProgress +
-    counters.waiting +
-    counters.scheduled +
-    counters.completed;
-
-  const tiles = [
-    {
-      label: t("dashboard.kpiNeedsCoordination"),
-      value: counters.needsCoordination,
-      tone: "critical" as KpiTone,
-      href: "/requests?status=NEEDS_COORDINATION",
-    },
-    {
-      label: t("dashboard.kpiInProgress"),
-      value: counters.inProgress,
-      tone: "info" as KpiTone,
-      href: "/requests?status=IN_PROGRESS",
-    },
-    {
-      label: t("dashboard.kpiWaiting"),
-      value: counters.waiting,
-      tone: "warning" as KpiTone,
-      href: "/requests?status=WAITING_FOR_CONTACT",
-    },
-    {
-      label: t("dashboard.kpiScheduled"),
-      value: counters.scheduled,
-      tone: "ok" as KpiTone,
-      href: "/requests?status=SCHEDULED",
-    },
-    {
-      label: t("dashboard.kpiToday"),
-      value: counters.today,
-      tone: "info" as KpiTone,
-      href: "/requests?view=today",
-    },
-    {
-      label: t("dashboard.kpiCompleted"),
-      value: counters.completed,
-      tone: "neutral" as KpiTone,
-      href: "/requests?status=COMPLETED",
-    },
-  ];
-
   return (
     <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
@@ -133,18 +87,9 @@ export default async function DashboardPage() {
         <p className="text-[14px] text-fog-veil">{formatDay(new Date(), locale)}</p>
       </header>
 
-      <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
-        {tiles.map((tile) => (
-          <KpiRing
-            key={tile.label}
-            label={tile.label}
-            value={tile.value}
-            total={totalForRings}
-            tone={tile.tone}
-            href={tile.href}
-          />
-        ))}
-      </section>
+      {/* The six counters used to be repeated here. They now live in the shell,
+          pinned under the top bar on every screen, so this page starts with the
+          thing only it can show. */}
 
       <GlassCard className="flex flex-col gap-4">
         <h2 className="text-[18px] font-medium text-ice-highlight">

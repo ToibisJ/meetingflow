@@ -114,27 +114,31 @@ export async function askGeorgeAction(
 
   const ctx = await requireUser();
 
-  const result = await runStructured(
-    { db: ctx.db, session: ctx.session, plan: ctx.plan },
-    {
-      feature: "ASSISTANT_CHAT",
-      permission: "request:read:own",
-      system: ROLE,
-      prompt: `--- המדריך ---\n${guideAsText()}\n--- סוף המדריך ---\n\nשאלה: ${question}`,
-      schema: AnswerSchema,
-      effort: "low",
-      maxTokens: 6000,
-      cacheSystem: true,
-    },
-  );
+  // A preview session is read-only, and the gateway records usage as it goes.
+  // Searching the guide is the honest thing to offer there.
+  if (!ctx.preview) {
+    const result = await runStructured(
+      { db: ctx.db, session: ctx.session, plan: ctx.plan },
+      {
+        feature: "ASSISTANT_CHAT",
+        permission: "request:read:own",
+        system: ROLE,
+        prompt: `--- המדריך ---\n${guideAsText()}\n--- סוף המדריך ---\n\nשאלה: ${question}`,
+        schema: AnswerSchema,
+        effort: "low",
+        maxTokens: 6000,
+        cacheSystem: true,
+      },
+    );
 
-  if (result.ok) {
-    return {
-      status: result.value.answered ? "answered" : "not_in_guide",
-      answer: result.value.answer,
-      sectionIds: result.value.sectionIds,
-      question,
-    };
+    if (result.ok) {
+      return {
+        status: result.value.answered ? "answered" : "not_in_guide",
+        answer: result.value.answer,
+        sectionIds: result.value.sectionIds,
+        question,
+      };
+    }
   }
 
   // No model, no budget, or a refusal — fall back to honest search.
